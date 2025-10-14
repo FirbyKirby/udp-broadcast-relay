@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>udp-broadcast-relay-redux</Name>
+  <Repository>your-registry/udp-broadcast-relay-redux:latest</Repository>
+  <Registry>https://hub.docker.com/</Registry>
+  <Network>host</Network>
+  <MyIP/>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/udp-redux/udp-broadcast-relay-redux</Support>
+  <Project>https://github.com/udp-redux/udp-broadcast-relay-redux</Project>
+  <Overview>UDP Broadcast Relay for IoT Device Discovery in Multi-VLAN Networks
+
+This container relays UDP broadcasts between VLANs to enable IoT device discovery across network segments. Perfect for HDHomerun tuners, Roku devices, Kasa smart home products, and other IoT devices that rely on UDP broadcasts for discovery.
+
+Each container broadcasts to ALL configured VLANs. For selective discovery, run separate containers with different VLAN configurations.
+
+**Use Cases:**
+- HDHomerun tuner discovery (port 65001)
+- Roku device discovery (port 1900, SSDP multicast)
+- Kasa smart plugs/switches (ports 9999/20002)
+- Other IoT devices requiring UDP broadcast relay
+
+**Network Requirements:**
+- Host network mode required for multi-VLAN access
+- NET_ADMIN and NET_RAW capabilities required
+- Unique RELAY_ID for each container instance</Overview>
+  <Category>Network:Tools</Category>
+  <WebUI/>
+  <TemplateURL>https://raw.githubusercontent.com/udp-redux/udp-broadcast-relay-redux/main/templates/unraid-template.xml</TemplateURL>
+  <Icon>https://raw.githubusercontent.com/udp-redux/udp-broadcast-relay-redux/main/icon.png</Icon>
+  <ExtraParams/>
+  <PostArgs/>
+  <CPUset/>
+  <DateInstalled>0</DateInstalled>
+  <DonateText/>
+  <DonateLink/>
+  <Requires/>
+  <Config Name="RELAY_ID" Target="RELAY_ID" Default="1" Mode="" Description="Unique ID (1-99) for loop prevention. Must be unique across all relay containers." Type="Variable" Display="always" Required="true" Mask="false">1</Config>
+  <Config Name="BROADCAST_PORT" Target="BROADCAST_PORT" Default="65001" Mode="" Description="UDP port to relay (65001=HDHomerun, 1900=Roku/SSDP, 9999=Kasa)" Type="Variable" Display="always" Required="true" Mask="false">65001</Config>
+  <Config Name="INTERFACES" Target="INTERFACES" Default="br0.10,br0.20" Mode="" Description="Comma-separated VLAN interfaces (e.g., br0.10,br0.20). Broadcasts go to ALL listed interfaces." Type="Variable" Display="always" Required="true" Mask="false">br0.10,br0.20</Config>
+  <Config Name="MULTICAST_GROUP" Target="MULTICAST_GROUP" Default="" Mode="" Description="Optional: Multicast IP to join (e.g., 239.255.255.250 for SSDP). Leave empty for broadcast-only operation." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="SPOOF_SOURCE" Target="SPOOF_SOURCE" Default="" Mode="" Description="Optional: Override source IP (empty=preserve original, 1.1.1.1=use interface address). Leave empty for most use cases." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="TARGET_OVERRIDE" Target="TARGET_OVERRIDE" Default="" Mode="" Description="Optional: Override destination IP (empty=preserve original, 255.255.255.255=broadcast). Leave empty for most use cases." Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="DEBUG" Target="DEBUG" Default="false" Mode="" Description="Enable verbose logging (true/false)" Type="Variable" Display="always" Required="false" Mask="false">false</Config>
+  <Config Name="TZ" Target="TZ" Default="UTC" Mode="" Description="Timezone for logs" Type="Variable" Display="always" Required="false" Mask="false">UTC</Config>
+</Container>

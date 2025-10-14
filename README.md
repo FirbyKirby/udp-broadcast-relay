@@ -1,106 +1,98 @@
-ARCHIVED
-===
+# UDP Broadcast Relay Redux - Docker
 
-This package still works perfectly fine to the best of my knowledge as of 2024, however I do not use it anymore personally and
-do not have time to follow issues / accept PRs. Feel free to fork as you see fit, following the license restrictions
-provided by this repo and the upstream.
+A Dockerized UDP broadcast relay that enables IoT device discovery across VLANs. Works alongside any network controller that already handles mDNS repeater functionality (for example, UDM Pro, UniFi Dream Router).
 
-UDP Broadcast Relay for Linux / FreeBSD / pfSense
-==========================
+- Solves: UDP broadcast discovery does not traverse VLAN boundaries by default
+- Fits: Home and lab networks where discovery must cross IoT, Media, Guest, and other segments
 
-This program listens for packets on a specified UDP broadcast port. When
-a packet is received, it sends that packet to all specified interfaces
-but the one it came from as though it originated from the original
-sender.
+> Warning
+> - Each container instance must use a unique RELAY_ID between 1 and 99 to prevent loops.
+> - Each container relays to all configured interfaces. For selective paths, run multiple containers with different interface sets.
 
-The primary purpose of this is to allow devices or game servers on separated
-local networks (Ethernet, WLAN, VLAN) that use udp broadcasts to find each
-other to do so.
+## Overview
 
-INSTALL
--------
+Many IoT ecosystems depend on UDP-based discovery. This container listens on the specified UDP port and relays traffic between the VLAN interfaces you list.
 
-    make
-    cp udp-broadcast-relay-redux /some/where
+Key features:
+- Multi-VLAN UDP relay with host networking
+- Supports HDHomerun, Roku/SSDP, Kasa, and similar UDP-discovery devices
+- Compatible with controllers that repeat mDNS; this container covers non‑mDNS UDP discovery
+- Environment-variable driven configuration
+- Built-in health check
 
-USAGE
------
+## Quick start
 
-```
-./udp-broadcast-relay-redux \
-    -id id \
-    --port <udp-port> \
-    --dev eth0 \
-    [--dev eth1...] \
-    [--multicast 224.0.0.251] \
-    [-s <spoof_source_ip>] \
-    [-t <overridden_target_ip>]
+```bash
+docker run -d \
+  --name udp-relay-hdhomerun \
+  --network host \
+  --cap-add NET_ADMIN \
+  --cap-add NET_RAW \
+  -e RELAY_ID=1 \
+  -e BROADCAST_PORT=65001 \
+  -e INTERFACES=br0.10,br0.20 \
+  your-registry/udp-broadcast-relay-redux:latest
 ```
 
-- udp-broadcast-relay-redux must be run as root to be able to create a raw
-  socket (necessary) to send packets as though they originated from the
-  original sender.
-- `id` must be unique number between instances. This is used to set the TTL of
-  outgoing packets to determine if a packet is an echo and should be discarded.
-- Multicast groups can be joined and relayed with
-  `--multicast <group address>`.
-- The source address for all packets can be modified with `-s <ip>`. This
-  is unusual.
-- A special source ip of `-s 1.1.1.1` can be used to set the source ip
-  to the address of the outgoing interface.
-- A special destination ip of `-t 255.255.255.255` can be used to set the
-  overriden target ip to the broadcast address of the outgoing interface.
-- `-f` will fork the application to the background.
+Notes:
+- On Unraid, VLAN interfaces typically appear as br0.X (for example, br0.10).
+- For Roku/SSDP on port 1900, also set MULTICAST_GROUP=239.255.255.250.
 
-EXAMPLE
--------
+## Architecture
 
-#### mDNS / Multicast DNS (Chromecast Discovery + Bonjour + More)
-`./udp-broadcast-relay-redux --id 1 --port 5353 --dev eth0 --dev eth1 --multicast 224.0.0.251 -s 1.1.1.1`
+This container bridges UDP discovery across VLANs. For selective discovery paths, run one container per device family or per path.
 
-(Chromecast requires broadcasts to originate from an address on its subnet)
+```
+VLAN 10 (IoT)          VLAN 20 (Media)
+     |                        |
+     |  UDP Broadcast         |
+     |------------------------>|
+     |                        |
+     v                        v
+HDHomerun Tuner          Media Server
+```
 
-#### SSDP (Roku Discovery + More)
-`./udp-broadcast-relay-redux --id 1 --port 1900 --dev eth0 --dev eth1 --multicast 239.255.255.250`
+> Tip
+> Use multiple containers when you need fine-grained control. Example: one container for VLAN 10 ↔ 20, another for VLAN 20 ↔ 30.
 
-#### Lifx Bulb Discovery
-`./udp-broadcast-relay-redux --id 1 --port 56700 --dev eth0 --dev eth1`
+Relationship to mDNS:
+- mDNS repeaters handle multicast DNS–based discovery like Chromecast, AirPlay, HomeKit, Sonos (newer models).
+- This relay focuses on non‑mDNS UDP discovery such as HDHomerun, Roku/SSDP, and Kasa.
 
-#### Broadlink IR Emitter Discovery
-`./udp-broadcast-relay-redux --id 1 --port 80 --dev eth0 --dev eth1`
+## Common use cases
 
-#### Warcraft 3 Server Discovery
-`./udp-broadcast-relay-redux --id 1 --port 6112 --dev eth0 --dev eth1`
+- HDHomerun tuner discovery on 65001 for Plex, Emby, etc.
+- Roku discovery via SSDP on 1900 with multicast group 239.255.255.250
+- TP‑Link Kasa discovery on 9999 and 20002
+- Other UDP discovery protocols that must traverse VLANs
 
-#### Relaying broadcasts between two LANs joined by tun-based VPN
-This example is from OpenWRT. Tun-based devices don't forward broadcast packets
- so temporarily rewriting the destination address (and then re-writing it back)
- is necessary.
+## Network requirements
 
-Router 1 (source):
+- Host network mode to expose all host VLAN interfaces to the container
+- Linux capabilities: NET_ADMIN and NET_RAW
+- Unique RELAY_ID per container (1–99) to enable TTL-based loop prevention
 
-`./udp-broadcast-relay-redux --id 1 --port 6112 --dev br-lan --dev tun0 -t 10.66.2.13`
+## Documentation
 
-(where 10.66.2.13 is the IP of router 2 over the tun0 link)
+- Configuration reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
+- Examples and patterns: [docs/EXAMPLES.md](docs/EXAMPLES.md)
+- Unraid setup guide: [docs/UNRAID_SETUP.md](docs/UNRAID_SETUP.md)
+- Loop prevention details: [docs/LOOP_PREVENTION.md](docs/LOOP_PREVENTION.md)
 
-Router 2 (target):
+## Docker Compose
 
-`./udp-broadcast-relay-redux --id 2 --port 6112 --dev br-lan --dev tun0 -t 255.255.255.255`
+See the complete multi-container example in [docker-compose.yml](docker-compose.yml).
 
-#### HDHomerun Discovery
-`./udp-broadcast-relay-redux --id 1 --port 65001 --dev eth0 --dev eth1`
+## Troubleshooting essentials
 
-Note about firewall rules
----
+- If discovery fails, confirm interface names exist and are up, RELAY_IDs are unique, and the correct port is configured.
+- For SSDP, ensure MULTICAST_GROUP=239.255.255.250 is set on the Roku relay.
+- Enable DEBUG=true temporarily and review logs.
 
-If you are running udp-broadcast-relay-redux on a router, it can be an easy
-way to relay broadcasts between VLANs. However, beware that these broadcasts
-will not establish a RELATED firewall relationship between the source and
-destination addresses.
+## Contributing
 
-This means if you have strict firewall rules, the recipient may not be able
-to respond to the broadcaster. For instance, the SSDP protocol involves
-sending a broadcast packet to port 1900 to discover devices on the network.
-The devices then respond to the broadcast with a unicast packet back to the
-original sender. You will need to make sure that your firewall rules allow
-these response packets to make it back to the original sender.
+This container packages the upstream tool: udp-broadcast-relay-redux. Contributions and issues are welcome: https://github.com/udp-redux/udp-broadcast-relay-redux
+
+## License
+
+GPL-2.0 (same as upstream udp-broadcast-relay-redux)
