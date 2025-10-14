@@ -15,18 +15,21 @@ RUN gcc -g main.c -o udp-broadcast-relay-redux
 **Stage 2: Runtime**
 ```dockerfile
 FROM alpine:3.19
-RUN addgroup -g 1000 relay && adduser -D -u 1000 -G relay relay
+RUN apk add --no-cache shadow && \
+    addgroup -g 1000 relay && adduser -D -u 1000 -G relay relay
 COPY --from=builder /udp-broadcast-relay-redux /usr/local/bin/
-RUN setcap cap_net_admin,cap_net_raw=eip /usr/local/bin/udp-broadcast-relay-redux
+RUN setcap cap_net_admin,cap_net_raw+ep /usr/local/bin/udp-broadcast-relay-redux
 USER relay
 ENTRYPOINT ["/entrypoint.sh"]
 ```
 
 ### Security Layers
-1. **Non-Root User:** relay:relay (1000:1000)
-2. **File Capabilities:** Set on binary, not inherited
-3. **Minimal Base:** Alpine Linux, no unnecessary packages
-4. **No Privileged Mode:** Capabilities sufficient
+1. **PUID/PGID Mapping:** Runtime user/group mapping with intelligent GID handling
+2. **Shadow Package:** Provides usermod/groupmod tools for user mapping
+3. **Non-Root User:** relay:relay (1000:1000 default, PUID/PGID configurable)
+4. **File Capabilities:** Set on binary, not inherited (cap_net_admin,cap_net_raw+ep)
+5. **Minimal Base:** Alpine Linux, no unnecessary packages
+6. **No Privileged Mode:** Capabilities sufficient
 
 ### Health Monitoring
 ```dockerfile
@@ -109,6 +112,19 @@ MULTICAST_GROUP=239.255.255.250
 
 **Entrypoint Processing:**
 ```bash
+# PUID/PGID runtime mapping
+if [ -n "$PUID" ] && [ "$PUID" != "1000" ]; then
+  usermod -o -u "$PUID" relay
+fi
+if [ -n "$PGID" ] && [ "$PGID" != "1000" ]; then
+  # Intelligent GID handling - avoid Alpine GID 100 conflict
+  if getent group "$PGID" >/dev/null 2>&1; then
+    groupmod -n relay "$(getent group "$PGID" | cut -d: -f1)"
+  else
+    groupmod -o -g "$PGID" relay
+  fi
+fi
+
 # Validate required params
 [ -z "$RELAY_ID" ] && error
 [ -z "$BROADCAST_PORT" ] && error

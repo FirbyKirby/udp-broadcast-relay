@@ -57,8 +57,31 @@ docker run --rm --entrypoint sh udp-broadcast-relay-redux:test -c "getcap /usr/l
 echo "✓ Capabilities check complete"
 echo ""
 
+# Test PUID/PGID functionality
+echo "7. Testing PUID/PGID functionality..."
+
+echo "   Test 7a: Default container behavior (no overrides)"
+docker run --rm --entrypoint sh udp-broadcast-relay-redux:test -c "id -u; id -g" | grep -q "1000" && echo "   ✓ Default PUID/PGID (1000/1000) works" || echo "   ✗ Default PUID/PGID failed"
+
+echo "   Test 7b: Unraid-style overrides (PUID=99 PGID=100)"
+docker run --rm -e PUID=99 -e PGID=100 -e TEST_MODE=1 -e RELAY_ID=1 -e BROADCAST_PORT=65001 -e INTERFACES=eth0 --entrypoint sh udp-broadcast-relay-redux:test -c "/usr/local/bin/entrypoint.sh 2>&1 | grep -q 'Using PUID=99 PGID=100'" && echo "   ✓ Unraid-style PUID/PGID override works" || echo "   ✗ Unraid-style PUID/PGID override failed"
+
+echo "   Test 7c: Verify capabilities are retained (default)"
+docker run --rm --entrypoint sh udp-broadcast-relay-redux:test -c "getcap /usr/local/bin/udp-broadcast-relay-redux" | grep -q "cap_net_admin,cap_net_raw=ep" && echo "   ✓ Capabilities maintained with default PUID/PGID" || echo "   ✗ Capabilities lost with default PUID/PGID"
+
+echo "   Test 7d: Verify capabilities are retained (with overrides)"
+docker run --rm -e PUID=99 -e PGID=100 --entrypoint sh udp-broadcast-relay-redux:test -c "getcap /usr/local/bin/udp-broadcast-relay-redux" | grep -q "cap_net_admin,cap_net_raw=ep" && echo "   ✓ Capabilities maintained with PUID/PGID overrides" || echo "   ✗ Capabilities lost with PUID/PGID overrides"
+
+echo "   Test 7e: Application runs with default PUID/PGID"
+timeout 5 docker run --rm -e TEST_MODE=1 -e RELAY_ID=1 -e BROADCAST_PORT=65001 -e INTERFACES=eth0,eth1 udp-broadcast-relay-redux:test 2>&1 | grep -q "Using PUID=1000 PGID=1000" && echo "   ✓ Application starts with default PUID/PGID" || echo "   ✗ Application failed to start with default PUID/PGID"
+
+echo "   Test 7f: Application runs with Unraid-style overrides"
+timeout 5 docker run --rm -e TEST_MODE=1 -e PUID=99 -e PGID=100 -e RELAY_ID=1 -e BROADCAST_PORT=65001 -e INTERFACES=eth0,eth1 udp-broadcast-relay-redux:test 2>&1 | grep -q "Using PUID=99 PGID=100" && echo "   ✓ Application starts with Unraid-style overrides" || echo "   ✗ Application failed to start with Unraid-style overrides"
+
+echo ""
+
 # Validate docker-compose
-echo "7. Validating docker-compose.yml..."
+echo "8. Validating docker-compose.yml..."
 docker compose -f docker-compose.yml config > /dev/null && echo "✓ docker-compose.yml is valid" || echo "✗ docker-compose.yml has errors"
 echo ""
 

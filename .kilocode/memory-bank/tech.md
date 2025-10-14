@@ -29,12 +29,15 @@
 - Base: Alpine Linux 3.19 (minimal)
 - Size: 8.35MB final image
 - Contents: Binary only, no build tools
-- User: relay:relay (non-root)
-- Capabilities: cap_net_admin,cap_net_raw=eip on binary
+- User: relay:relay (non-root, PUID/PGID mapped)
+- Capabilities: cap_net_admin,cap_net_raw+ep on binary
 
 ### Security Implementation
-- **Non-Root User:** relay:relay (UID/GID 1000)
-- **Minimal Capabilities:** Only NET_ADMIN and NET_RAW
+- **PUID/PGID Support:** Runtime user/group mapping with shadow package
+- **Default UID/GID:** 1000:1000 (LinuxServer.io pattern)
+- **Runtime Mapping:** Intelligent GID handling avoids Alpine GID 100 conflict
+- **Shadow Package:** Provides usermod/groupmod tools for user mapping
+- **Minimal Capabilities:** Only NET_ADMIN and NET_RAW (cap_net_admin,cap_net_raw+ep)
 - **No Privileged Mode:** Not required
 - **File Capabilities:** Set on binary, not shell
 - **Health Check:** pgrep monitoring

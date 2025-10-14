@@ -33,6 +33,8 @@
 - `INTERFACES`: Comma-separated VLAN interfaces (e.g., br0.10,br0.20)
 
 ### Optional Environment Variables
+- `PUID`: User ID for runtime user mapping (default: 1000, container)
+- `PGID`: Group ID for runtime group mapping (default: 1000, container)
 - `MULTICAST_GROUP`: Multicast IP to join (for Roku/SSDP)
 - `SPOOF_SOURCE`: Override source IP (empty=preserve, 1.1.1.1=auto)
 - `TARGET_OVERRIDE`: Override destination IP
@@ -48,7 +50,8 @@
 ## Technical Specifications
 - **Base Image:** Alpine Linux 3.19
 - **Final Size:** 8.35MB
-- **User:** Non-root (relay:relay)
-- **Capabilities:** NET_ADMIN, NET_RAW
+- **User:** Non-root (relay:relay, PUID/PGID configurable)
+- **Capabilities:** NET_ADMIN, NET_RAW (cap_net_admin,cap_net_raw+ep)
 - **Network Mode:** Host (required)
 - **Health Check:** Process monitoring via pgrep
+- **PUID/PGID Defaults:** Container=1000:1000, Unraid=99:100 (nobody:users)

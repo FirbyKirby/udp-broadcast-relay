@@ -72,6 +72,69 @@ Relationship to mDNS:
 - Linux capabilities: NET_ADMIN and NET_RAW
 - Unique RELAY_ID per container (1–99) to enable TTL-based loop prevention
 
+## PUID and PGID (LinuxServer.io pattern)
+
+PUID and PGID allow the container to run as a specific user and group from your host system. This maps file ownership inside the container to your host user and group so any files written to mounted volumes are owned by the expected account. This project follows the widely used LinuxServer.io convention.
+
+Defaults (Unraid-friendly):
+- PUID: 99
+- PGID: 100
+
+On Unraid, 99:100 corresponds to the nobody:users account and works well for typical share permissions. If you are not on Unraid, or your shares use different ownership, set PUID/PGID to your actual user and group.
+
+When to change the defaults:
+- You are not running Unraid (for example, Ubuntu/Debian hosts often use 1000:1000 for the first user)
+- Your mapped host path (bind mount or volume) is owned by a specific user/group and you want files created by the container to match that ownership
+- You see permission denied errors when the container tries to read/write files on a mounted path
+
+How to set custom values:
+- docker run:
+  ```bash
+  docker run -d \
+    --name udp-relay-hdhomerun \
+    --network host \
+    --cap-add NET_ADMIN \
+    --cap-add NET_RAW \
+    -e RELAY_ID=1 \
+    -e BROADCAST_PORT=65001 \
+    -e INTERFACES=br0.10,br0.20 \
+    -e PUID=1000 \
+    -e PGID=1000 \
+    your-registry/udp-broadcast-relay-redux:latest
+  ```
+
+- Docker Compose (excerpt):
+  ```yaml
+  services:
+    udp-relay-hdhomerun:
+      image: your-registry/udp-broadcast-relay-redux:latest
+      network_mode: host
+      cap_add: [ "NET_ADMIN", "NET_RAW" ]
+      environment:
+        RELAY_ID: 1
+        BROADCAST_PORT: 65001
+        INTERFACES: br0.10,br0.20
+        PUID: 1000
+        PGID: 1000
+  ```
+
+Find your UID and GID:
+```bash
+id -u   # prints your numeric user ID (e.g., 1000)
+id -g   # prints your numeric group ID (e.g., 1000)
+# Or to see both plus groups:
+id
+```
+
+Troubleshooting file permissions:
+- Symptom: Permission denied when accessing a mounted path from the container
+- Fixes:
+  - Set PUID/PGID to match the owner of the mounted path (use ls -l on the host to check)
+  - Or adjust ownership on the host: sudo chown -R <uid>:<gid> /path/to/mount
+  - Validate that the mount path exists and is writable by the target UID/GID
+
+See the detailed configuration in [docs/CONFIGURATION.md](docs/CONFIGURATION.md) and Unraid-specific guidance in [docs/UNRAID_SETUP.md](docs/UNRAID_SETUP.md).
+
 ## Documentation
 
 - Configuration reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md)

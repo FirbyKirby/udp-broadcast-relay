@@ -44,6 +44,8 @@ This guide provides step-by-step instructions for setting up UDP Broadcast Relay
 - **RELAY_ID:** Unique ID (1-99) - must be different for each container
 - **BROADCAST_PORT:** UDP port for your device type
 - **INTERFACES:** Comma-separated VLAN interfaces (e.g., `br0.10,br0.20`)
+- **PUID:** User ID to run as on the host (LinuxServer.io pattern). Default on Unraid: `99` (user: nobody)
+- **PGID:** Group ID to run as on the host (LinuxServer.io pattern). Default on Unraid: `100` (group: users)
 
 #### Advanced Settings
 - **Extra Parameters:** Add `--cap-add NET_ADMIN --cap-add NET_RAW`
@@ -55,6 +57,51 @@ This guide provides step-by-step instructions for setting up UDP Broadcast Relay
 1. Click **Apply** to create the container
 2. Click the container icon to start it
 3. Check logs to verify it's running correctly
+
+## PUID and PGID on Unraid (LinuxServer.io pattern)
+
+PUID and PGID map the container process to a specific host user and group. This ensures files created by the container on mounted Unraid shares are owned by the expected account. This project follows the well-known LinuxServer.io pattern.
+
+Defaults on Unraid:
+- PUID: `99` (user: nobody)
+- PGID: `100` (group: users)
+
+When to keep the defaults:
+- Your Unraid shares are using the standard nobody:users ownership
+- You do not need files written by the container to be owned by a specific named user
+
+When to change the defaults:
+- You are not running Unraid (for example, typical Linux hosts often use `1000:1000` for the first user)
+- Your target share or bind mount path is owned by a specific UID:GID and you want new files to match that ownership
+- You see "permission denied" errors when the container accesses mounted paths
+
+Find your UID and GID on the host:
+```bash
+id -u   # prints your numeric user ID (e.g., 1000)
+id -g   # prints your numeric group ID (e.g., 1000)
+id      # prints full identity (uid, gid, and groups)
+```
+
+Set PUID/PGID in the Unraid template:
+1. Go to **Docker** → your container → **Edit**
+2. In the Environment Variables section, add or update:
+   - Name: `PUID`  Value: `1000`  (example)
+   - Name: `PGID`  Value: `1000`  (example)
+3. Click **Apply** to save and restart the container
+
+Example (for reference only; Unraid uses form fields):
+```yaml
+environment:
+  RELAY_ID: 1
+  BROADCAST_PORT: 65001
+  INTERFACES: br0.10,br0.20
+  PUID: 1000
+  PGID: 1000
+```
+
+See also:
+- Configuration details: [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
+- Overview in README: [README.md](README.md)
 
 ## Device-Specific Configurations
 
@@ -155,6 +202,20 @@ docker run --rm --net=host nicolaka/netshoot tcpdump -i any udp port 1900 and ho
 1. Ensure each container has a unique RELAY_ID
 2. Check that containers aren't relaying to the same interfaces multiple times
 3. Reduce the number of interfaces if possible
+
+### File Permission Issues
+**Symptoms:** "permission denied" errors when reading/writing mounted shares; files created with unexpected ownership
+
+**Solutions:**
+1. Use PUID/PGID to match the owner of the mounted path
+   - Determine ownership on the host: `ls -l /path/to/share`
+   - Set PUID/PGID to that UID:GID in the container environment
+2. Or adjust host ownership to your chosen UID:GID:
+   ```bash
+   sudo chown -R <uid>:<gid> /path/to/share
+   ```
+3. Confirm the mount path exists and is writable by the chosen UID/GID
+4. Review detailed guidance: [docs/CONFIGURATION.md](docs/CONFIGURATION.md) and the PUID/PGID overview in [README.md](README.md)
 
 ## Network Controller Integration
 

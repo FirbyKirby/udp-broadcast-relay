@@ -15,6 +15,8 @@ services:
       - INTERFACES=br0.10,br0.20,br0.30
       - DEBUG=false
       - TZ=UTC
+      - PUID=99
+      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
@@ -38,6 +40,8 @@ services:
       - MULTICAST_GROUP=239.255.255.250
       - DEBUG=false
       - TZ=UTC
+      - PUID=99
+      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
@@ -60,6 +64,8 @@ services:
       - INTERFACES=br0.10,br0.20,br0.30
       - DEBUG=false
       - TZ=UTC
+      - PUID=99
+      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
@@ -82,6 +88,8 @@ services:
       - INTERFACES=br0.10,br0.20,br0.30
       - DEBUG=false
       - TZ=UTC
+      - PUID=99
+      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
@@ -121,6 +129,11 @@ services:
 # 7. Health Checks: Monitor relay process
 #    - Ensures container stays running
 #    - Automatic restart on process failure
+#
+# 8. PUID and PGID: User and Group ID settings
+#    - PUID: Process User ID (default: 99 for 'nobody' in Unraid)
+#    - PGID: Process Group ID (default: 100 for 'users' in Unraid)
+#    - Used for file permissions when mounting host volumes
 #
 # Usage Examples:
 #

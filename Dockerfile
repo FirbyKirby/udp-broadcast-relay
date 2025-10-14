@@ -14,14 +14,18 @@ RUN gcc -g main.c -o udp-broadcast-relay-redux
 # Runtime stage - minimal Alpine Linux
 FROM alpine:3.19
 
+# Set default PUID and PGID following LinuxServer.io pattern
+ENV PUID=1000
+ENV PGID=1000
+
 # Copy binary from builder stage
 COPY --from=builder /build/udp-broadcast-relay-redux /usr/local/bin/
 
 # Install runtime dependencies and create non-root user
-RUN apk add --no-cache libcap \
-    && addgroup -g 1000 relay \
-    && adduser -D -s /bin/sh -u 1000 -G relay relay \
-    && setcap cap_net_admin,cap_net_raw+eip /usr/local/bin/udp-broadcast-relay-redux
+RUN apk add --no-cache libcap shadow \
+    && addgroup -g $PGID relay \
+    && adduser -D -s /bin/sh -u $PUID -G relay relay \
+    && setcap cap_net_admin,cap_net_raw+ep /usr/local/bin/udp-broadcast-relay-redux
 
 # Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/

@@ -84,6 +84,80 @@ This document provides a complete reference for all environment variables used t
 - **Default:** `America/Chicago`
 - **Notes:** Uses standard timezone identifiers.
 
+#### `PUID`
+- **Type:** Integer (numeric user ID)
+- **Required:** No
+- **Description:** Run the process as this host user ID for proper file ownership on mounted volumes (LinuxServer.io pattern).
+- **Default:** `99` (Unraid's "nobody" user)
+- **Notes:** Set to your host user ID if you are not on Unraid or if your shares are owned by a different user.
+
+#### `PGID`
+- **Type:** Integer (numeric group ID)
+- **Required:** No
+- **Description:** Run the process with this host group ID for proper file ownership on mounted volumes (LinuxServer.io pattern).
+- **Default:** `100` (Unraid's "users" group)
+- **Notes:** Set to your host group ID if you are not on Unraid or if your shares are owned by a different group.
+
+### User and Group Mapping (LinuxServer.io pattern)
+
+This image supports mapping the container process to a specific host user and group via PUID and PGID. This ensures files created by the container on mounted paths are owned by the expected account on the host.
+
+- Defaults (Unraid-friendly):
+  - PUID: `99` (user: nobody)
+  - PGID: `100` (group: users)
+- When to change:
+  - You are not running Unraid (common host defaults are `1000:1000` for the first user)
+  - Your mounted path (bind or volume) is owned by another UID:GID and you want new files to match that ownership
+  - You see "permission denied" errors reading/writing mounted files
+
+Find your UID/GID on the host:
+```bash
+id -u   # prints your numeric user ID (e.g., 1000)
+id -g   # prints your numeric group ID (e.g., 1000)
+id      # prints full identity (uid, gid, groups)
+```
+
+Examples:
+- docker run
+  ```bash
+  docker run -d \
+    --name udp-relay-hdhomerun \
+    --network host \
+    --cap-add NET_ADMIN \
+    --cap-add NET_RAW \
+    -e RELAY_ID=1 \
+    -e BROADCAST_PORT=65001 \
+    -e INTERFACES=br0.10,br0.20 \
+    -e PUID=1000 \
+    -e PGID=1000 \
+    your-registry/udp-broadcast-relay-redux:latest
+  ```
+- docker-compose excerpt
+  ```yaml
+  services:
+    udp-relay-hdhomerun:
+      image: your-registry/udp-broadcast-relay-redux:latest
+      network_mode: host
+      cap_add: [ "NET_ADMIN", "NET_RAW" ]
+      environment:
+        RELAY_ID: 1
+        BROADCAST_PORT: 65001
+        INTERFACES: br0.10,br0.20
+        PUID: 1000
+        PGID: 1000
+  ```
+
+Troubleshooting file permissions:
+- Symptom: "permission denied" when accessing a mounted path
+- Remedies:
+  - Set PUID/PGID to the owner of the mount path (check with `ls -l` on the host)
+  - Or adjust host ownership: `sudo chown -R <uid>:<gid> /path/to/mount`
+  - Confirm the mount path exists and is writable by the chosen UID/GID
+
+See also:
+- Unraid defaults and guidance: [docs/UNRAID_SETUP.md](docs/UNRAID_SETUP.md)
+- Overview in README: [README.md](README.md)
+
 ## Configuration Examples
 
 ### HDHomerun Tuner Discovery
