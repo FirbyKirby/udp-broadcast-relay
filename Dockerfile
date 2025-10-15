@@ -1,5 +1,7 @@
 # Multi-architecture Dockerfile for udp-broadcast-relay-redux
-FROM --platform=$BUILDPLATFORM alpine:3.19 AS builder
+FROM alpine:3.19 AS builder
+ARG TARGETPLATFORM
+RUN echo "Target platform: $TARGETPLATFORM"
 
 # Install build dependencies
 RUN apk add --no-cache gcc musl-dev linux-headers

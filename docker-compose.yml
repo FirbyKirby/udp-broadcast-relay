@@ -4,7 +4,7 @@ services:
   # HDHomerun tuner discovery relay
   # Relays UDP broadcasts on port 65001 between VLANs
   hdhomerun-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: docker.io/firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -28,7 +28,7 @@ services:
   # Roku device discovery relay
   # Relays SSDP multicast broadcasts on port 1900 between VLANs
   roku-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: docker.io/firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -53,7 +53,7 @@ services:
   # Kasa smart home relay (port 9999)
   # Relays TP-Link Kasa device discovery broadcasts
   kasa-relay-9999:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: docker.io/firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -77,7 +77,7 @@ services:
   # Kasa smart home relay (port 20002)
   # Additional Kasa discovery port for some device types
   kasa-relay-20002:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: docker.io/firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN

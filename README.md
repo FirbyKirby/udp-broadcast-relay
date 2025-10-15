@@ -31,7 +31,7 @@ docker run -d \
   -e RELAY_ID=1 \
   -e BROADCAST_PORT=65001 \
   -e INTERFACES=br0.10,br0.20 \
-  your-registry/udp-broadcast-relay-redux:latest
+  docker.io/firbykirby/udp-broadcast-relay:latest
 ```
 
 Notes:
@@ -100,14 +100,14 @@ How to set custom values:
     -e INTERFACES=br0.10,br0.20 \
     -e PUID=1000 \
     -e PGID=1000 \
-    your-registry/udp-broadcast-relay-redux:latest
+    docker.io/firbykirby/udp-broadcast-relay:latest
   ```
 
 - Docker Compose (excerpt):
   ```yaml
   services:
     udp-relay-hdhomerun:
-      image: your-registry/udp-broadcast-relay-redux:latest
+      image: docker.io/firbykirby/udp-broadcast-relay:latest
       network_mode: host
       cap_add: [ "NET_ADMIN", "NET_RAW" ]
       environment:
