@@ -33,3 +33,36 @@ For issues or questions:
 - Review debug logging examples
 - Ensure unique RELAY_ID values across containers
 - Verify network interface names and capabilities
+## CI/CD workflows
+
+Three workflow scenarios are implemented:
+
+- Scenario 1 — PRs merging to main
+  - Automated validation runs on the PR via .github/workflows/test.yml.
+  - When the PR is merged to main, CI does not re-run tests and does not publish images.
+
+- Scenario 2 — Version tags on main (v*)
+  - Pushing a version tag from main triggers the full pipeline in .github/workflows/docker-publish.yml:
+    - test → build → push → sync (Docker Hub README) → release (GitHub)
+
+- Scenario 3 — Manual workflow dispatch
+  - You may run .github/workflows/test.yml or .github/workflows/docker-publish.yml independently from the Actions tab; no automatic chaining occurs.
+
+Manual triggers
+
+- GitHub UI
+  - Actions → select a workflow → Run workflow
+
+- GitHub CLI (optional)
+  ```bash
+  # Run tests manually
+  gh workflow run .github/workflows/test.yml
+
+  # Run publish pipeline manually (no tag required)
+  gh workflow run .github/workflows/docker-publish.yml
+  ```
+
+References
+- Developer guide: docs/DEVELOPER_GUIDE.md
+- Branch strategy: docs/BRANCH_STRATEGY.md
+- Dependency-chain design: docs/WORKFLOW_DEPENDENCY_CHAIN_DESIGN.md

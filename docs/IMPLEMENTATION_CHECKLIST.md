@@ -36,21 +36,24 @@ Test each workflow trigger to ensure the CI/CD pipeline functions correctly.
 
 - [ ] Push a test commit to dev branch and verify test workflow triggers
 - [ ] Create a pull request from dev to main and verify required checks run
-- [ ] Merge the pull request and verify docker-publish workflow triggers
+- [ ] Merge the pull request and verify no workflows trigger on main
+- [ ] Create and push a version tag (for example v0.0.0-test) and verify the full pipeline runs in [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml): test → build → push → sync → release
 
 ## Step 4: Begin Using the Workflow
 Start following the two-branch development process.
 
 - [ ] All new development work should be done on the dev branch
 - [ ] Use pull requests to merge changes from dev to main
-- [ ] Ensure all merges to main trigger the appropriate workflows
+- [ ] Ensure merges to main do not trigger CI; publish only via version tags (v*) from main
 
 ## Verification Steps
 Confirm the two-branch strategy is fully operational:
 
 - [ ] Verify both main and dev branches exist in the repository
-- [ ] Test pushing to dev branch triggers the test workflow
-- [ ] Test creating a pull request from dev to main triggers required checks
-- [ ] Verify branch protection rules prevent direct pushes to main (attempt a direct push to confirm it's blocked)
+- [ ] Pushing to dev triggers the test workflow
+- [ ] Creating a pull request from dev to main runs required checks
+- [ ] Merging the PR to main triggers no workflows (tests/publish are skipped)
+- [ ] Pushing a version tag v* triggers [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml) with dependency chain: test → build → push → sync → release
+- [ ] Branch protection rules prevent direct pushes to main (attempt a direct push to confirm it's blocked)
 
 Once all steps are completed and verified, the two-branch strategy is active and ready for use.

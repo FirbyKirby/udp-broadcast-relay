@@ -21,7 +21,6 @@ Benefits
 - Auditable: All syncs are traceable in GitHub Actions run history.
 
 When the sync runs
-- On push to main branch.
 - On push of version tags matching v* (for example v1.2.3).
 - On manual trigger from the Actions tab via workflow_dispatch.
 - Only after the build-and-push job has completed successfully.
@@ -40,7 +39,7 @@ Sequence
 
 ```mermaid
 flowchart TD
-  A[Trigger push to main or v* tag or manual dispatch] --> B[Job build-and-push builds multi-arch images]
+  A[Trigger v* tag push or manual dispatch] --> B[Job build-and-push builds multi-arch images]
   B --> C[Images pushed and manifest published]
   C --> D[Job sync-readme starts]
   D --> E[Checkout repository]
@@ -108,10 +107,10 @@ Step 3 — Verify the workflow file exists
 - Confirm [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml) is present in the default branch.
 
 Step 4 — Initial test
-Option A: Test with a trivial README change
-- Make a small change to [README.md](README.md) (for example, fix a typo).
-- Commit to main (or merge a PR into main).
-- The pipeline builds and then runs sync-readme to update Docker Hub.
+Option A: Test with manual workflow_dispatch
+- From the repository’s Actions tab, select Publish Docker image (multi-arch).
+- Click Run workflow to trigger a manual run.
+- The workflow builds images and then runs sync-readme to update Docker Hub.
 
 Option B: Test with a temporary tag
 
@@ -132,8 +131,7 @@ Verification
 ## 5. Usage
 
 Automatic sync behavior
-- On push to main: Images are built and pushed; if successful, the README is synced.
-- On version tag push v*: Same as above; intended for release tags.
+- On version tag push v*: The full pipeline runs for releases (test → build → push → sync → release).
 
 Manual sync
 - From the repository’s Actions tab, select Publish Docker image (multi-arch), then click Run workflow.
