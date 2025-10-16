@@ -61,8 +61,12 @@ jobs:
 
       - name: Generate human-readable Trivy report
         if: always()
-        run: |
-          docker run --rm -v $(pwd):/workspace aquasec/trivy:latest image --format table --output /workspace/trivy-report.txt udp-broadcast-relay-redux:test-${{ github.sha }}
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: udp-broadcast-relay-redux:test-${{ github.sha }}
+          format: 'table'
+          output: 'trivy-report.txt'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
 
       - name: Upload Trivy scan report
         uses: actions/upload-artifact@v4
