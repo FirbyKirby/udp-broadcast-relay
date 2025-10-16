@@ -38,11 +38,10 @@ jobs:
         with:
           images: docker.io/firbykirby/udp-broadcast-relay
           tags: |
-            # SemVer tags on git tags like v1.2.3
+            # Always publish latest on master branch pushes
+            type=raw,value=latest
+            # Publish vX.Y.Z on tag pushes
             type=semver,pattern={{version}}
-          flavor: |
-            # Add 'latest' on default branch (master)
-            latest=true
 
       - name: Build and push (multi-arch)
         uses: docker/build-push-action@v6
