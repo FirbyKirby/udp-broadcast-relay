@@ -72,6 +72,35 @@
 
 ## Recent Changes
 
+### Two-Branch Strategy Implementation
+- **Status:** Complete and verified
+- **Strategy:** Implemented main/dev two-branch workflow with full CI/CD integration
+- **Branches:**
+  - **main:** Production-ready code, protected branch, publishes to Docker Hub
+  - **dev:** Daily development branch, runs tests, no Docker publishing
+- **CI/CD Updates:**
+  - Test workflow (`.github/workflows/test.yml`): Runs on both main and dev pushes, PRs to main
+  - Docker publish workflow (`.github/workflows/docker-publish.yml`): Hardened to only publish from main branch
+  - README sync: Now works for workflow_run events (auto-sync on main merges)
+- **Automatic Release Creation:**
+  - Added `create-release` job to docker-publish workflow
+  - Generates release notes automatically from git commits between tags
+  - Creates GitHub releases when version tags (v*) are pushed
+  - Includes full changelog links and formatted commit list
+- **Documentation Created:**
+  - [`docs/BRANCH_STRATEGY.md`](docs/BRANCH_STRATEGY.md): Branch strategy, CI/CD flow, GitHub protection configuration
+  - [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md): Day-to-day workflow, git commands, troubleshooting
+  - [`docs/IMPLEMENTATION_CHECKLIST.md`](docs/IMPLEMENTATION_CHECKLIST.md): Step-by-step activation guide
+- **Branch Protection Requirements:**
+  - Require PR before merging to main
+  - Require status checks to pass (Test workflow)
+  - Require branches to be up to date
+  - Prevent direct pushes to main (even for administrators)
+- **Workflow:**
+  - Develop on dev → Create PR to main → Tests run → Merge → Tests + Docker publish
+  - Tag releases from main only → Automatic GitHub release creation with notes
+- **Single Developer Model:** Self-approval acceptable, but tests always required
+
 ### Branch Rename: master to main
 - **Status:** Complete and verified
 - **Action:** Repository's default branch renamed from master to main
@@ -83,7 +112,7 @@
 - **Status:** Complete and verified
 - **Components:** Test workflow, publish workflow, enhanced test script
 - **Security:** Trivy vulnerability scanning integrated
-- **Triggers:** PRs, master pushes, version tags, manual dispatch
+- **Triggers:** PRs, main/dev pushes, version tags, manual dispatch
 - **Behavior:** Tests before publish, multi-arch builds, Docker Hub publishing
 - **Verification:** All configurations correct, no critical issues
 
@@ -100,6 +129,7 @@
   - Push to main branch
   - Version tag creation (v*)
   - Manual workflow_dispatch
+  - Workflow_run (after Test completes on main)
 - **Key Features:**
   - Job dependencies ensure sync only after successful multi-arch build
   - Comprehensive error handling with structured logging
