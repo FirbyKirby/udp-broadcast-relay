@@ -192,6 +192,26 @@ Relay 1 (ID=1):
 6. **Syntax Tests:**
    - docker-compose.yml validates
 
+### CI/CD Pipeline Architecture
+
+#### Workflow Structure
+- **Test Workflow:** Single-arch build (linux/amd64) for fast testing
+- **Publish Workflow:** Multi-arch build (linux/amd64, linux/arm64) for distribution
+- **Dependency Chain:** Publish only runs after successful test completion
+- **Trigger Types:** PRs (test only), master pushes (test + publish), version tags (test + publish), manual (full cycle)
+
+#### Security Integration
+- **Trivy Scanning:** Vulnerability scanning at test and publish stages
+- **Modes:** Informational (test), blocking (publish for CRITICAL/HIGH)
+- **Reporting:** SARIF uploads to GitHub Security tab
+- **Coverage:** Both intermediate and final images
+
+#### Build Optimization
+- **Conditional Logic:** Skip builds if images exist in CI environment
+- **Caching:** GitHub Actions cache for Docker layers and dependencies
+- **Concurrency Control:** Cancel in-progress runs on new commits
+- **Resource Efficiency:** Single-arch for testing, multi-arch only for publishing
+
 ### Test Results
 - **All Tests:** PASS
 - **Image Size:** 8.35MB (within 10-15MB target)

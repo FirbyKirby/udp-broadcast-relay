@@ -1,0 +1,82 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [ "master" ]
+  push:
+    branches: [ "master" ]
+    tags: [ "v*" ]
+  workflow_dispatch:
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: udp-broadcast-relay-redux:test-${{ github.sha }}
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Make test script executable
+        run: chmod +x build-and-test.sh
+
+      - name: Run test script
+        run: TEST_IMAGE=udp-broadcast-relay-redux:test-${{ github.sha }} ./build-and-test.sh
+
+      - name: Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: 'image'
+          image-ref: 'udp-broadcast-relay-redux:test-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+          exit-code: 0
+
+      - name: Upload SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: container-scan
+
+      - name: Generate human-readable Trivy report
+        if: always()
+        run: |
+          docker run --rm -v $(pwd):/workspace aquasecurity/trivy:latest image --format table --output /workspace/trivy-report.txt udp-broadcast-relay-redux:test-${{ github.sha }}
+
+      - name: Upload Trivy scan report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: trivy-scan-report
+          path: trivy-report.txt
+          retention-days: 30
+
+      - name: Upload test logs on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-logs
+          path: |
+            *.log
+          retention-days: 7

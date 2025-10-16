@@ -94,6 +94,31 @@
 └── TEST_RESULTS.md           # Validation results
 ```
 
+## CI/CD Tooling and Security Scanning
+
+### GitHub Actions Workflows
+- **Test Workflow:** [.github/workflows/test.yml](.github/workflows/test.yml) - Comprehensive testing before publishing
+- **Publish Workflow:** [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml) - Multi-arch builds and publishing
+- **Triggers:** PRs, master pushes, version tags (v*), manual dispatch
+- **Permissions:** contents:read, security-events:write, packages:write
+- **Concurrency:** Per-ref with cancel-in-progress
+- **Cache Strategy:** GitHub Actions cache (type=gha)
+
+### Security Scanning
+- **Tool:** Trivy vulnerability scanner
+- **Version:** 0.28.0 (pinned)
+- **Modes:** Informational (test), blocking (publish for CRITICAL/HIGH)
+- **Reporting:** SARIF uploads to GitHub Security tab
+- **Retention:** Human-readable reports (30 days)
+- **Coverage:** Both test and published images
+
+### Build Optimization
+- **Multi-stage:** Builder/runtime separation
+- **Single-arch Test:** linux/amd64 for faster testing
+- **Multi-arch Publish:** linux/amd64, linux/arm64
+- **Conditional Builds:** Skip if image exists in CI
+- **Cache Layers:** GitHub Actions cache for dependencies
+
 ## Critical Fixes Applied
 1. **entrypoint.sh:** Removed invalid --foreground flag
 2. **Dockerfile:** Fixed capability target (binary vs shell)
