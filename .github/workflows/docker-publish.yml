@@ -82,3 +82,78 @@ jobs:
         with:
           sarif_file: trivy-published.sarif
           category: published-image-scan
+
+  sync-readme:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: success() && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log sync attempt
+        run: |
+          echo "::group::README Sync Information"
+          echo "Workflow: ${{ github.workflow }}"
+          echo "Event: ${{ github.event_name }}"
+          echo "Ref: ${{ github.ref }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Repository: firbykirby/udp-broadcast-relay"
+          echo "README file: ./README.md"
+          echo "::endgroup::"
+
+      - name: Sync README to Docker Hub
+        uses: peter-evans/dockerhub-description@e98e4d1628a5f3be2be7c231e50981aee52723ae  # v4.0.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: firbykirby/udp-broadcast-relay
+          readme-filepath: ./README.md
+          short-description: 'UDP broadcast relay for Docker - relay UDP broadcasts across VLANs/subnets with mDNS support'
+
+      - name: Log sync success
+        if: success()
+        run: |
+          echo "::notice::README successfully synchronized to Docker Hub"
+          echo "Docker Hub repository: https://hub.docker.com/r/firbykirby/udp-broadcast-relay"
+
+      - name: Log sync failure
+        if: failure()
+        run: |
+          echo "::error::Failed to synchronize README to Docker Hub"
+          echo "::error::Check the following:"
+          echo "::error::1. DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets are correctly configured"
+          echo "::error::2. Docker Hub repository 'firbykirby/udp-broadcast-relay' exists and is accessible"
+          echo "::error::3. README.md file exists and is readable"
+          echo "::error::4. Docker Hub API is operational (check https://status.docker.com)"
+          echo "::error::Manual retry: Use workflow_dispatch to retry without rebuilding images"
+
+      - name: Generate job summary
+        if: always()
+        run: |
+          echo "## README Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ **Status:** Success" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The README.md has been successfully synchronized to Docker Hub." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Docker Hub Repository:** [firbykirby/udp-broadcast-relay](https://hub.docker.com/r/firbykirby/udp-broadcast-relay)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Status:** Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Failed to synchronize README to Docker Hub. See error logs above for details." >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Troubleshooting:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Verify Docker Hub credentials are valid" >> $GITHUB_STEP_SUMMARY
+            echo "- Check Docker Hub API status" >> $GITHUB_STEP_SUMMARY
+            echo "- Retry using workflow_dispatch trigger" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Workflow Details:**" >> $GITHUB_STEP_SUMMARY
+          echo "- Event: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Ref: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "- SHA: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

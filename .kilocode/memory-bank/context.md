@@ -87,6 +87,35 @@
 - **Behavior:** Tests before publish, multi-arch builds, Docker Hub publishing
 - **Verification:** All configurations correct, no critical issues
 
+### README Synchronization Workflow
+- **Status:** Complete and verified
+- **Purpose:** Automatically synchronize README.md to Docker Hub after successful image publication
+- **Integration:** Added as `sync-readme` job in docker-publish.yml workflow
+- **Action Used:** peter-evans/dockerhub-description@v4 (pinned to commit SHA)
+- **Docker Hub Repository:** firbykirby/udp-broadcast-relay
+- **Required Secrets:**
+  - DOCKERHUB_USERNAME (Docker Hub username)
+  - DOCKERHUB_TOKEN (Docker Hub access token with read/write scope)
+- **Triggers:** Runs after successful image builds on:
+  - Push to main branch
+  - Version tag creation (v*)
+  - Manual workflow_dispatch
+- **Key Features:**
+  - Job dependencies ensure sync only after successful multi-arch build
+  - Comprehensive error handling with structured logging
+  - 5-minute timeout prevents hanging
+  - Idempotent operations (safe to re-run)
+  - GitHub Actions job summaries for quick status checks
+- **Documentation:**
+  - User Guide: [`docs/DOCKERHUB_README_SYNC.md`](docs/DOCKERHUB_README_SYNC.md)
+  - Architecture Spec: [`docs/ARCHITECTURE_README_SYNC.md`](docs/ARCHITECTURE_README_SYNC.md)
+  - Workflow File: [`.github/workflows/docker-publish.yml`](.github/workflows/docker-publish.yml)
+- **Maintenance:**
+  - Update README.md in repository - sync happens automatically on next eligible run
+  - Manual sync: Use workflow_dispatch trigger from Actions tab
+  - Token rotation: Recommended every 90 days
+  - Troubleshooting: See user guide for common issues and resolution steps
+
 ## Documentation Organization
 
 ### Root Level
