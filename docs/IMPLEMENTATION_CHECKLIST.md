@@ -25,8 +25,10 @@ Set up branch protection rules for the main branch to enforce code review and pr
 - [ ] Navigate to repository Settings > Branches
 - [ ] Add branch protection rule for `main` branch
 - [ ] Enable "Require pull request reviews before merging"
-- [ ] Enable "Require status checks to pass before merging" (include test and docker-publish workflows)
-- [ ] Enable "Include administrators" if desired
+- [ ] Enable "Require status checks to pass before merging"
+  - Add required status check: **Test** (only this workflow, not docker-publish)
+- [ ] Enable "Require branches to be up to date before merging"
+- [ ] Enable "Do not allow bypassing the above settings" to enforce for administrators
 - [ ] Save the branch protection rule
 
 ## Step 3: Verify the Setup Works
