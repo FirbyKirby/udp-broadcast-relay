@@ -27,8 +27,8 @@ COPY --from=builder /build/udp-broadcast-relay-redux /usr/local/bin/
 
 # Install runtime dependencies and create non-root user
 RUN apk add --no-cache libcap shadow \
-    && addgroup -g $PGID relay \
-    && adduser -D -s /bin/sh -u $PUID -G relay relay \
+    && if getent group $PGID > /dev/null 2>&1; then GROUP_NAME=$(getent group $PGID | cut -d: -f1); else addgroup -g $PGID relay && GROUP_NAME=relay; fi \
+    && adduser -D -s /bin/sh -u $PUID -G $GROUP_NAME relay \
     && setcap cap_net_admin,cap_net_raw+ep /usr/local/bin/udp-broadcast-relay-redux
 
 # Copy entrypoint script
