@@ -59,8 +59,8 @@ usage() {
     log "  SPOOF_SOURCE    - Override source IP (empty=preserve, 1.1.1.1=auto)"
     log "  TARGET_OVERRIDE - Override destination IP (empty=original, 255.255.255.255=broadcast)"
     log "  DEBUG           - Enable verbose logging (true/false, default: false)"
-    log "  PUID            - User ID for the relay user (default: 1000)"
-    log "  PGID            - Group ID for the relay user (default: 1000)"
+    log "  PUID            - User ID for the relay user (default: 99)"
+    log "  PGID            - Group ID for the relay user (default: 100)"
     log ""
     exit 1
 }
@@ -137,8 +137,8 @@ if [ -n "$TARGET_OVERRIDE" ]; then
     log "  TARGET_OVERRIDE: $TARGET_OVERRIDE"
 fi
 log "  DEBUG: ${DEBUG:-false}"
-log "  PUID: ${PUID:-1000}"
-log "  PGID: ${PGID:-1000}"
+log "  PUID: ${PUID:-99}"
+log "  PGID: ${PGID:-100}"
 log ""
 log "Using PUID=$PUID PGID=$PGID"
 log "Effective: uid=$(id -u relay) gid=$(id -g relay) groups=$(id -G relay)"

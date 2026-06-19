@@ -16,9 +16,11 @@ RUN gcc -g main.c -o udp-broadcast-relay-redux
 # Runtime stage - minimal Alpine Linux
 FROM alpine:3.19
 
-# Set default PUID and PGID following LinuxServer.io pattern
-ENV PUID=1000
-ENV PGID=1000
+# Set default PUID and PGID (Unraid defaults: nobody:users)
+ARG PUID=99
+ARG PGID=100
+ENV PUID=$PUID
+ENV PGID=$PGID
 
 # Copy binary from builder stage
 COPY --from=builder /build/udp-broadcast-relay-redux /usr/local/bin/
