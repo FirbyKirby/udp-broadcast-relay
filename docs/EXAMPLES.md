@@ -30,7 +30,7 @@ docker run -d \
   -e RELAY_ID=1 \
   -e BROADCAST_PORT=65001 \
   -e INTERFACES=br0.10,br0.20 \
-  your-registry/udp-broadcast-relay-redux:latest
+  firbykirby/udp-broadcast-relay:latest
 ```
 
 ### Docker Compose
@@ -38,7 +38,7 @@ docker run -d \
 version: '3.8'
 services:
   hdhomerun-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -72,7 +72,7 @@ docker run -d \
   -e BROADCAST_PORT=1900 \
   -e INTERFACES=br0.10,br0.20 \
   -e MULTICAST_GROUP=239.255.255.250 \
-  your-registry/udp-broadcast-relay-redux:latest
+  firbykirby/udp-broadcast-relay:latest
 ```
 
 ### Docker Compose
@@ -80,7 +80,7 @@ docker run -d \
 version: '3.8'
 services:
   roku-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -107,7 +107,7 @@ docker run -d \
   -e RELAY_ID=3 \
   -e BROADCAST_PORT=9999 \
   -e INTERFACES=br0.10,br0.20 \
-  your-registry/udp-broadcast-relay-redux:latest
+  firbykirby/udp-broadcast-relay:latest
 ```
 
 ### Docker Run (Port 20002)
@@ -120,7 +120,7 @@ docker run -d \
   -e RELAY_ID=4 \
   -e BROADCAST_PORT=20002 \
   -e INTERFACES=br0.10,br0.20 \
-  your-registry/udp-broadcast-relay-redux:latest
+  firbykirby/udp-broadcast-relay:latest
 ```
 
 ## Multiple Container Setup
@@ -133,7 +133,7 @@ version: '3.8'
 services:
   # HDHomerun tuner discovery
   hdhomerun-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -146,7 +146,7 @@ services:
 
   # Roku SSDP discovery
   roku-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -160,7 +160,7 @@ services:
 
   # Kasa smart home (port 9999)
   kasa-relay-9999:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -173,7 +173,7 @@ services:
 
   # Kasa smart home (port 20002)
   kasa-relay-20002:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -194,7 +194,7 @@ services:
 version: '3.8'
 services:
   iot-to-media-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -206,7 +206,7 @@ services:
     restart: unless-stopped
 
   media-to-guest-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -224,7 +224,7 @@ version: '3.8'
 services:
   # Kitchen IoT devices
   kitchen-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -237,7 +237,7 @@ services:
 
   # Bedroom IoT devices
   bedroom-relay:
-    image: your-registry/udp-broadcast-relay-redux:latest
+    image: firbykirby/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
@@ -264,7 +264,7 @@ docker run -d \
   -e BROADCAST_PORT=65001 \
   -e INTERFACES=br0.10,br0.20 \
   -e TARGET_OVERRIDE=255.255.255.255 \
-  your-registry/udp-broadcast-relay-redux:latest
+  firbykirby/udp-broadcast-relay:latest
 ```
 
 - Without TARGET_OVERRIDE, the relay preserves the original destination, and when it detects a broadcast destination on ingress it automatically rewrites to the egress interface broadcast address.
@@ -284,7 +284,7 @@ docker run -d \
   -e BROADCAST_PORT=9999 \
   -e INTERFACES=br0.10,br0.20 \
   -e SPOOF_SOURCE=1.1.1.1 \
-  your-registry/udp-broadcast-relay-redux:latest
+  firbykirby/udp-broadcast-relay:latest
 
 # Use the egress interface IP but preserve the original source port
 docker run -d \
@@ -296,7 +296,7 @@ docker run -d \
   -e BROADCAST_PORT=9999 \
   -e INTERFACES=br0.10,br0.20 \
   -e SPOOF_SOURCE=1.1.1.2 \
-  your-registry/udp-broadcast-relay-redux:latest
+  firbykirby/udp-broadcast-relay:latest
 ```
 
 - SPOOF_SOURCE unset: the original sender IP is preserved.
@@ -320,7 +320,7 @@ docker run -d \
   -e BROADCAST_PORT=65001 \
   -e INTERFACES=br0.10,br0.20 \
   -e DEBUG=true \
-  your-registry/udp-broadcast-relay-redux:latest
+  firbykirby/udp-broadcast-relay:latest
 ```
 
 ## Interface Naming Examples
