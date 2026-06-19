@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>udp-broadcast-relay-redux</Name>
-  <Repository>your-registry/udp-broadcast-relay-redux:latest</Repository>
-  <Registry>https://hub.docker.com/</Registry>
+  <Repository>firbykirby/udp-broadcast-relay:latest</Repository>
+  <Registry>https://hub.docker.com/r/firbykirby/udp-broadcast-relay</Registry>
   <Network>host</Network>
   <MyIP/>
   <Shell>sh</Shell>
   <Privileged>false</Privileged>
-  <Support>https://github.com/udp-redux/udp-broadcast-relay-redux</Support>
-  <Project>https://github.com/udp-redux/udp-broadcast-relay-redux</Project>
+  <Support>https://github.com/FirbyKirby/udp-broadcast-relay</Support>
+  <Project>https://github.com/FirbyKirby/udp-broadcast-relay</Project>
   <Overview>UDP Broadcast Relay for IoT Device Discovery in Multi-VLAN Networks
 
 This container relays UDP broadcasts between VLANs to enable IoT device discovery across network segments. Perfect for HDHomerun tuners, Roku devices, Kasa smart home products, and other IoT devices that rely on UDP broadcasts for discovery.
@@ -27,8 +27,8 @@ Each container broadcasts to ALL configured VLANs. For selective discovery, run 
 - Unique RELAY_ID for each container instance</Overview>
   <Category>Network:Tools</Category>
   <WebUI/>
-  <TemplateURL>https://raw.githubusercontent.com/udp-redux/udp-broadcast-relay-redux/main/templates/unraid-template.xml</TemplateURL>
-  <Icon>https://raw.githubusercontent.com/udp-redux/udp-broadcast-relay-redux/main/icon.png</Icon>
+  <TemplateURL>https://raw.githubusercontent.com/FirbyKirby/udp-broadcast-relay/main/templates/unraid-template.xml</TemplateURL>
+  <Icon></Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
