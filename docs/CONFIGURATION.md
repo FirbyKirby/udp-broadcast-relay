@@ -130,13 +130,13 @@ Examples:
     -e INTERFACES=br0.10,br0.20 \
     -e PUID=1000 \
     -e PGID=1000 \
-    your-registry/udp-broadcast-relay-redux:latest
+    firbykirby/udp-broadcast-relay:latest
   ```
 - docker-compose excerpt
   ```yaml
   services:
     udp-relay-hdhomerun:
-      image: your-registry/udp-broadcast-relay-redux:latest
+      image: firbykirby/udp-broadcast-relay:latest
       network_mode: host
       cap_add: [ "NET_ADMIN", "NET_RAW" ]
       environment:
