@@ -61,27 +61,21 @@ jobs:
 
 The README sync job will inherit the workflow triggers but apply additional filtering:
 
-**Workflow-Level Triggers (inherited, unchanged):**
+**Workflow-Level Triggers (updated):**
 ```yaml
 on:
   push:
-    branches: ["main"]
     tags: ["v*"]
   workflow_dispatch:
-  workflow_run:
-    workflows: ["Test"]
-    types: [completed]
-    branches: ["main"]
 ```
 
-**Job-Level Conditions (new):**
+**Job-Level Conditions (updated):**
 ```yaml
 sync-readme:
   needs: build-and-push
   if: |
-    success() && 
-    (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-    (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
+    success() &&
+    (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
 ```
 
 ### 2.2 Trigger Logic Explanation
@@ -89,24 +83,24 @@ sync-readme:
 **README sync will run when:**
 1. ✅ `build-and-push` job completes successfully
 2. ✅ Event is either `push` or `workflow_dispatch` (user-initiated)
-3. ✅ Target is either `main` branch or a version tag (`v*`)
+3. ✅ For automated runs, the ref is a version tag v*; manual runs via workflow_dispatch are always allowed
 
 **README sync will NOT run when:**
 1. ❌ Build job fails (ensures only successful builds update README)
 2. ❌ Triggered by `workflow_run` (test completion) - avoids redundant syncs
-3. ❌ Push to non-main branches (feature branches)
+3. ❌ Pushes to any branch (including main)
 4. ❌ Non-version tags
 
 ### 2.3 Edge Cases Handled
 
 | Scenario | Behavior | Justification |
 |----------|----------|---------------|
-| PR merge to main | ✅ Sync runs | Main branch updates should sync |
-| Direct push to main | ✅ Sync runs | Same as PR merge |
-| Tag creation (v1.0.0) | ✅ Sync runs | Version releases should update description |
+| PR merge to main | ❌ No run | Main merges do not trigger this workflow |
+| Direct push to main | ❌ No run | Only tags v* or manual dispatch trigger |
+| Tag creation (v1.0.0) | ✅ Sync runs | Releases should update description |
 | Build fails | ❌ Skip sync | Don't update README if images aren't published |
 | Manual workflow_dispatch | ✅ Sync runs | Allow manual README updates |
-| Workflow_run trigger | ❌ Skip sync | Test completion alone doesn't warrant sync |
+| Workflow_run trigger | N/A | Not used in this architecture |
 | Concurrent runs | ⏳ Queued | Concurrency group ensures serialization |
 
 ---
@@ -515,10 +509,10 @@ git push origin v0.0.0-test
 - Confirm README sync runs for version tags
 - Delete test tag after validation
 
-4. **Monitor Main Branch:**
-- Make minor README change
-- Push to main branch
-- Verify automatic sync occurs
+4. **Monitor Release Tags:**
+- Create a test version tag, for example v0.0.0-monitor
+- Push the tag and verify the Publish Docker image (multi-arch) workflow runs and the sync-readme job succeeds
+- Delete the test tag after validation
 
 **Staging Environment:**
 - **Not required** - Docker Hub is production environment
@@ -557,7 +551,7 @@ git push origin main
 ### 9.1 Complete Job Flow
 
 ```
-Trigger Event (push main/tag, workflow_dispatch)
+Trigger Event (push tag v*, workflow_dispatch)
   ↓
 [workflow filter: allowed event types]
   ↓
@@ -584,20 +578,18 @@ Job: sync-readme (new)
 build-and-push ──[needs + if: success()]──> sync-readme
      │                                           │
      │                                           │
-  [always runs]                      [conditional: main/tag only]
+  [always runs]                      [conditional: tag or manual only]
 ```
 
 ### 9.3 Conditional Execution Matrix
 
-| Trigger | Branch/Tag | build-and-push | sync-readme |
-|---------|------------|----------------|-------------|
-| push | main | ✅ Runs | ✅ Runs |
+| Trigger | Ref | build-and-push | sync-readme |
+|---------|-----|----------------|-------------|
+| push | main | ❌ Skipped | ❌ Skipped |
 | push | feature/* | ❌ Skipped | ❌ Skipped |
 | push | v1.0.0 | ✅ Runs | ✅ Runs |
-| push | test-tag | ✅ Runs | ❌ Skipped |
-| workflow_dispatch | main | ✅ Runs | ✅ Runs |
-| workflow_dispatch | feature/* | ✅ Runs | ❌ Skipped |
-| workflow_run | main (test success) | ✅ Runs | ❌ Skipped |
+| push | non-v tag | ❌ Skipped | ❌ Skipped |
+| workflow_dispatch | any ref | ✅ Runs | ✅ Runs |
 
 ---
 
@@ -678,7 +670,7 @@ build-and-push ──[needs + if: success()]──> sync-readme
 **Testing Phase Tasks:**
 1. Validate workflow YAML syntax
 2. Test workflow_dispatch from feature branch
-3. Merge to main and verify automatic sync
+3. Merge to main and confirm no sync runs
 4. Create test tag and verify tag-based sync
 5. Verify Docker Hub README content and links
 6. Delete test tag after validation
