@@ -1,0 +1,33 @@
+version: '3.8'
+
+# HDHomerun Discovery Relay
+# Relays HDHomerun discovery broadcasts (UDP 65001) between VLANs where:
+#   - HDHomerun tuner is on one VLAN
+#   - Media clients (Plex, Emby) are on other VLANs
+# Runs on Unraid with host networking
+#
+# Multi-VLAN example (uncomment and adjust for your network):
+# INTERFACES=br0.10,br0.11,br0.21
+
+services:
+  hdhomerun-relay:
+    image: firbykirby/udp-broadcast-relay:latest
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    environment:
+      - RELAY_ID=1
+      - BROADCAST_PORT=65001
+      - INTERFACES=br0.10,br0.20
+      - DEBUG=false
+      - TZ=UTC
+      - PUID=99
+      - PGID=100
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
