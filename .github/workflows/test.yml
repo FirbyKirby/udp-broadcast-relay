@@ -42,7 +42,7 @@ jobs:
         run: TEST_IMAGE=udp-broadcast-relay-redux:test-${{ github.sha }} ./build-and-test.sh
 
       - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           scan-type: 'image'
           image-ref: 'udp-broadcast-relay-redux:test-${{ github.sha }}'
@@ -60,7 +60,7 @@ jobs:
 
       - name: Generate human-readable Trivy report
         if: always()
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           image-ref: udp-broadcast-relay-redux:test-${{ github.sha }}
           format: 'table'
