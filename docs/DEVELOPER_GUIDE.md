@@ -11,9 +11,9 @@ flowchart LR
   checks --> ok{tests pass}
   ok -- yes --> merge[merge to main]
   ok -- no --> dev
-  merge --> checks2[Actions: Test workflow]
-  merge --> publish[Docker publish]
-  publish --> tags[latest + vX.Y.Z]
+  merge -.-> noTests[no tests on main merge]
+  merge -.-> noPublish[no publish on main merge]
+  mainTag[push tag vX.Y.Z on main] --> chain[Test → Build → Push → Sync → Release]
 ```
 
 ---
@@ -99,9 +99,47 @@ gh pr create --base main --head dev --fill
 - For a single‑developer repo, self‑approval is acceptable and enforced via branch protection
 - All required checks must be green, and the PR must be up to date with main
 
-7. Merge to main (publishes Docker on success)
-- Merging to main re‑runs tests and, on success, publishes images via [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml)
-- Tags published include latest and version tags when present
+7. Merge to main (no CI on merge)
+- PR validation has already run; merging to main does not trigger tests, builds, or publishing
+- To publish, create a version tag from main (see section 3)
+
+## 2.1) CI/CD workflow behavior and manual triggers
+
+Three scenarios
+- PR merge to main: Automated tests already ran on the PR via [.github/workflows/test.yml](.github/workflows/test.yml). Merging to main does not run tests or publish images.
+- Version tags on main: Full pipeline runs in [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml) with an enforced dependency chain: test → build → push → sync → release.
+- Manual dispatches: You can run [.github/workflows/test.yml](.github/workflows/test.yml) or [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml) independently from the Actions tab. No automatic chaining occurs.
+
+Manual triggers
+- GitHub UI
+  - Open the repository → Actions → select a workflow → Run workflow
+- GitHub CLI
+  ```bash
+  # Trigger tests manually
+  gh workflow run .github/workflows/test.yml
+
+  # Trigger publish pipeline manually (no tag required)
+  gh workflow run .github/workflows/docker-publish.yml
+  ```
+
+Dependency chain for version tags
+```mermaid
+flowchart TB
+  Tag[Push Tag v*] --> Test[test]
+  Test -->|pass| Build[build & push]
+  Test -->|fail| Stop[stop]
+  Build --> Sync[sync README to Docker Hub]
+  Build --> Release[create GitHub Release]
+```
+
+When tests run vs. skip
+- Push to dev: tests run in [.github/workflows/test.yml](.github/workflows/test.yml)
+- PR to main: tests run in [.github/workflows/test.yml](.github/workflows/test.yml)
+- Merge to main: tests do not run; nothing publishes
+- Push tag v*: tests run first inside [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml); build/push only executes if tests pass
+- Manual dispatch:
+  - test.yml: runs tests only
+  - docker-publish.yml: can run publish independently (intended for controlled/manual operations)
 
 ---
 
