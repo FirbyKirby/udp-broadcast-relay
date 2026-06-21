@@ -88,25 +88,26 @@ This document provides a complete reference for all environment variables used t
 - **Type:** Integer (numeric user ID)
 - **Required:** No
 - **Description:** Run the process as this host user ID for proper file ownership on mounted volumes (LinuxServer.io pattern).
-- **Default:** `1000` (typical first Linux user); Unraid template overrides to `99`
-- **Notes:** Set to your host user ID if your shares are owned by a different user.
+- **Default:** `1000` (typical first Linux user)
+- **Notes:** The Unraid template overrides this to `99` (Unraid's "nobody" user) at runtime. Set to your host user ID if your shares are owned by a different user.
 
 #### `PGID`
 - **Type:** Integer (numeric group ID)
 - **Required:** No
 - **Description:** Run the process with this host group ID for proper file ownership on mounted volumes (LinuxServer.io pattern).
-- **Default:** `1000` (typical first Linux group); Unraid template overrides to `100`
-- **Notes:** Set to your host group ID if your shares are owned by a different group.
+- **Default:** `1000` (typical first Linux user group)
+- **Notes:** The Unraid template overrides this to `100` (Unraid's "users" group) at runtime. Set to your host group ID if your shares are owned by a different group.
 
 ### User and Group Mapping (LinuxServer.io pattern)
 
 This image supports mapping the container process to a specific host user and group via PUID and PGID. This ensures files created by the container on mounted paths are owned by the expected account on the host.
 
 - Defaults:
-  - PUID: `1000` (typical first Linux user); Unraid template overrides to `99`
-  - PGID: `1000` (typical first Linux group); Unraid template overrides to `100`
+  - PUID: `1000` (typical first Linux user)
+  - PGID: `1000` (typical first Linux user group)
+  - Note: The Unraid template overrides these to `99`/`100` at runtime
 - When to change:
-  - Your host user/group IDs differ from the defaults (e.g., not `1000:1000`)
+  - Your mounted path (bind or volume) is owned by a different UID:GID and you want new files to match that ownership
   - Your mounted path (bind or volume) is owned by another UID:GID and you want new files to match that ownership
   - You see "permission denied" errors reading/writing mounted files
 
