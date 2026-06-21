@@ -144,7 +144,8 @@ See the detailed configuration in [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
 
 ## Docker Compose
 
-See the complete multi-container example in [docker-compose.yml](docker-compose.yml).
+- Complete multi-container example: [docker-compose.yml](docker-compose.yml)
+- HDHomerun-specific single-service example: [docker-compose.hdhomerun.yml](docker-compose.hdhomerun.yml)
 
 ## Troubleshooting essentials
 
