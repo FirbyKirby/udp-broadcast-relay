@@ -16,9 +16,10 @@ RUN gcc -g main.c -o udp-broadcast-relay-redux
 # Runtime stage - minimal Alpine Linux
 FROM alpine:3.19
 
-# Set default PUID and PGID (Unraid defaults: nobody:users)
-ARG PUID=99
-ARG PGID=100
+# Set default PUID and PGID following LinuxServer.io pattern
+# Override at runtime for specific platforms (e.g., Unraid template passes PUID=99 / PGID=100)
+ARG PUID=1000
+ARG PGID=1000
 ENV PUID=$PUID
 ENV PGID=$PGID
 
