@@ -1,5 +1,5 @@
 # Multi-architecture Dockerfile for udp-broadcast-relay-redux
-FROM alpine:3.19 AS builder
+FROM alpine:3.21 AS builder
 ARG TARGETPLATFORM
 RUN echo "Target platform: $TARGETPLATFORM"
 
@@ -14,7 +14,7 @@ COPY main.c .
 RUN gcc -g main.c -o udp-broadcast-relay-redux
 
 # Runtime stage - minimal Alpine Linux
-FROM alpine:3.19
+FROM alpine:3.21
 
 # Set default PUID and PGID following LinuxServer.io pattern
 # Override at runtime for specific platforms (e.g., Unraid template passes PUID=99 / PGID=100)
