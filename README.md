@@ -132,10 +132,7 @@ For Unraid users, see [Unraid Setup Guide](docs/UNRAID_SETUP.md) for platform-sp
 
 ## Documentation
 
-- Configuration reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
-- Examples and patterns: [docs/EXAMPLES.md](docs/EXAMPLES.md)
-- Unraid setup guide: [docs/UNRAID_SETUP.md](docs/UNRAID_SETUP.md)
-- Loop prevention details: [docs/LOOP_PREVENTION.md](docs/LOOP_PREVENTION.md)
+- [Documentation Index](docs/README.md)
 
 ## Docker Compose
 

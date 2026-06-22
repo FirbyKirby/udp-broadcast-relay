@@ -650,17 +650,17 @@ build-and-push:
 
 **Files to Update:**
 
-1. **docs/BRANCH_STRATEGY.md**
+1. **BRANCH_STRATEGY.md**
    - Update CI/CD workflow section
    - Add note about no auto-publish on main merges
    - Update version tag flow diagram
 
-2. **docs/DEVELOPER_GUIDE.md**
+2. **DEVELOPER_GUIDE.md**
    - Update workflow descriptions
    - Add note about explicit tag pushing for releases
    - Update troubleshooting section
 
-3. **docs/IMPLEMENTATION_CHECKLIST.md**
+3. **IMPLEMENTATION_CHECKLIST.md**
    - Update workflow verification steps
    - Add new testing scenarios
 

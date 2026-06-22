@@ -1,6 +1,6 @@
 # Developer Guide: Working with the Two-Branch Strategy
 
-This guide shows how to work day‑to‑day with the main/dev workflow, from first‑time setup to shipping a release. It complements the high‑level overview in [docs/BRANCH_STRATEGY.md](docs/BRANCH_STRATEGY.md) and the CI/CD definitions in [.github/workflows/test.yml](.github/workflows/test.yml) and [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml).
+This guide shows how to work day‑to‑day with the main/dev workflow, from first‑time setup to shipping a release. It complements the high‑level overview in [BRANCH_STRATEGY.md](BRANCH_STRATEGY.md) and the CI/CD definitions in [.github/workflows/test.yml](.github/workflows/test.yml) and [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml).
 
 ## At a glance
 
@@ -332,6 +332,6 @@ Docker images
 - Keep PRs small and focused
 
 Related documents
-- Branch strategy and protections: [docs/BRANCH_STRATEGY.md](docs/BRANCH_STRATEGY.md)
+- Branch strategy and protections: [BRANCH_STRATEGY.md](BRANCH_STRATEGY.md)
 - Test workflow definition: [.github/workflows/test.yml](.github/workflows/test.yml)
 - Docker publish workflow: [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml)
