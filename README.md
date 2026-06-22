@@ -74,20 +74,17 @@ Relationship to mDNS:
 
 ## PUID and PGID (LinuxServer.io pattern)
 
-PUID and PGID allow the container to run as a specific user and group from your host system. This maps file ownership inside the container to your host user and group so any files written to mounted volumes are owned by the expected account. This project follows the widely used LinuxServer.io convention.
+This container follows the [LinuxServer.io](https://www.linuxserver.io/) convention of using `PUID` and `PGID` environment variables to map the container user to a user on your host. This ensures files written to mounted volumes are owned by the expected account. The default values are 1000/1000, which matches the first user on most Linux distributions.
 
-Defaults (Unraid-friendly):
-- PUID: 99
-- PGID: 100
+### Finding your UID and GID
 
-On Unraid, 99:100 corresponds to the nobody:users account and works well for typical share permissions. If you are not on Unraid, or your shares use different ownership, set PUID/PGID to your actual user and group.
+```bash
+id -u   # prints your numeric user ID (e.g., 1000)
+id -g   # prints your numeric group ID (e.g., 1000)
+```
 
-When to change the defaults:
-- You are not running Unraid (for example, Ubuntu/Debian hosts often use 1000:1000 for the first user)
-- Your mapped host path (bind mount or volume) is owned by a specific user/group and you want files created by the container to match that ownership
-- You see permission denied errors when the container tries to read/write files on a mounted path
+### Usage examples
 
-How to set custom values:
 - docker run:
   ```bash
   docker run -d \
@@ -118,29 +115,24 @@ How to set custom values:
         PGID: 1000
   ```
 
-Find your UID and GID:
-```bash
-id -u   # prints your numeric user ID (e.g., 1000)
-id -g   # prints your numeric group ID (e.g., 1000)
-# Or to see both plus groups:
-id
-```
+### Troubleshooting
+
+When to change the defaults:
+- Your mapped host path (bind mount or volume) is owned by a specific user/group and you want files created by the container to match that ownership
+- You see permission denied errors when the container tries to read/write files on a mounted path
 
 Troubleshooting file permissions:
 - Symptom: Permission denied when accessing a mounted path from the container
 - Fixes:
-  - Set PUID/PGID to match the owner of the mounted path (use ls -l on the host to check)
-  - Or adjust ownership on the host: sudo chown -R <uid>:<gid> /path/to/mount
+  - Set PUID/PGID to match the owner of the mounted path (use `ls -l` on the host to check)
+  - Or adjust ownership on the host: `sudo chown -R <uid>:<gid> /path/to/mount`
   - Validate that the mount path exists and is writable by the target UID/GID
 
-See the detailed configuration in [docs/CONFIGURATION.md](docs/CONFIGURATION.md) and Unraid-specific guidance in [docs/UNRAID_SETUP.md](docs/UNRAID_SETUP.md).
+For Unraid users, see [Unraid Setup Guide](docs/UNRAID_SETUP.md) for platform-specific guidance, including the template defaults.
 
 ## Documentation
 
-- Configuration reference: [docs/CONFIGURATION.md](docs/CONFIGURATION.md)
-- Examples and patterns: [docs/EXAMPLES.md](docs/EXAMPLES.md)
-- Unraid setup guide: [docs/UNRAID_SETUP.md](docs/UNRAID_SETUP.md)
-- Loop prevention details: [docs/LOOP_PREVENTION.md](docs/LOOP_PREVENTION.md)
+- [Documentation Index](docs/README.md)
 
 ## Docker Compose
 

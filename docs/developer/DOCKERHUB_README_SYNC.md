@@ -3,11 +3,8 @@
 Keep Docker Hub documentation in lockstep with your repository by automatically syncing README.md after successful image publishes.
 
 - Workflow file: [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml)
-- Architecture deep dive: [docs/ARCHITECTURE_README_SYNC.md](docs/ARCHITECTURE_README_SYNC.md)
+- Developer guide: [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
 - Docker Hub repository: https://hub.docker.com/r/firbykirby/udp-broadcast-relay
-
-Note
-This document is user-focused. For design rationale, security reviews, and alternative approaches, see [docs/ARCHITECTURE_README_SYNC.md](docs/ARCHITECTURE_README_SYNC.md).
 
 
 ## 1. Overview
@@ -244,7 +241,7 @@ Operational tips
 ## 9. Reference
 
 - Workflow file: [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml)
-- Architecture details: [docs/ARCHITECTURE_README_SYNC.md](docs/ARCHITECTURE_README_SYNC.md)
+- Developer guide: [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
 - Root README: [README.md](README.md)
 - Docker Hub repository: https://hub.docker.com/r/firbykirby/udp-broadcast-relay
 - Action used: https://github.com/peter-evans/dockerhub-description
