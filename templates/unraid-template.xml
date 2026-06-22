@@ -28,7 +28,7 @@ Each container broadcasts to ALL configured VLANs. For selective discovery, run 
   <Category>Network:Tools</Category>
   <WebUI/>
   <TemplateURL>https://raw.githubusercontent.com/FirbyKirby/udp-broadcast-relay/main/templates/unraid-template.xml</TemplateURL>
-  <Icon></Icon>
+  <Icon>https://raw.githubusercontent.com/FirbyKirby/udp-broadcast-relay/main/templates/icon.png</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
