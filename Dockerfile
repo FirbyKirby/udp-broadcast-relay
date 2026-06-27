@@ -26,7 +26,7 @@ ENV PGID=$PGID
 # Copy binary from builder stage
 COPY --from=builder /build/udp-broadcast-relay-redux /usr/local/bin/
 
-RUN apk add --no-cache libcap shadow su-exec \
+RUN apk add --no-cache libcap shadow \
     && (getent group $PGID > /dev/null 2>&1 && delgroup $(getent group $PGID | cut -d: -f1) || true) \
     && (getent passwd $PUID > /dev/null 2>&1 && deluser $(getent passwd $PUID | cut -d: -f1) || true) \
     && (addgroup -g $PGID relay 2>/dev/null || addgroup relay) \
@@ -40,8 +40,7 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Set working directory
 WORKDIR /app
 
-# Run as root; entrypoint uses su-exec to drop privileges
-USER root
+USER relay
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

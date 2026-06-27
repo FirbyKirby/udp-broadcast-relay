@@ -152,4 +152,5 @@ if [ "$TEST_MODE" = "1" ]; then
 fi
 
 # Execute the binary with constructed arguments
-exec su-exec "$PUID:$PGID" /usr/local/bin/udp-broadcast-relay-redux $ARGS
+# setcap grants NET_RAW/NET_ADMIN regardless of UID
+exec /usr/local/bin/udp-broadcast-relay-redux $ARGS
