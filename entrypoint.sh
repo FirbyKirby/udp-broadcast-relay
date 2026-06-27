@@ -152,4 +152,4 @@ if [ "$TEST_MODE" = "1" ]; then
 fi
 
 # Execute the binary with constructed arguments
-exec su relay -c "/usr/local/bin/udp-broadcast-relay-redux $ARGS"
+exec su-exec "$PUID:$PGID" /usr/local/bin/udp-broadcast-relay-redux $ARGS
