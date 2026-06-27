@@ -22,10 +22,25 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Pull BuildKit image (with retry)
+        run: |
+          for i in 1 2 3; do
+            echo "Attempt $i: pulling moby/buildkit:buildx-stable-1"
+            if docker pull moby/buildkit:buildx-stable-1; then
+              echo "Successfully pulled BuildKit image"
+              exit 0
+            fi
+            echo "Attempt $i failed, waiting ${i}0 seconds before retry..."
+            sleep ${i}0
+          done
+          echo "Failed to pull BuildKit image after 3 attempts"
+          exit 1
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
       - name: Build test image
+        id: build
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -53,13 +68,13 @@ jobs:
 
       - name: Upload SARIF results
         uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        if: always() && hashFiles('trivy-results.sarif') != ''
         with:
           sarif_file: trivy-results.sarif
           category: container-scan
 
       - name: Generate human-readable Trivy report
-        if: always()
+        if: always() && steps.build.outcome == 'success'
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: udp-broadcast-relay-redux:test-${{ github.sha }}
@@ -69,7 +84,7 @@ jobs:
 
       - name: Upload Trivy scan report
         uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && hashFiles('trivy-report.txt') != ''
         with:
           name: trivy-scan-report
           path: trivy-report.txt
@@ -77,7 +92,7 @@ jobs:
 
       - name: Upload test logs on failure
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: failure() && hashFiles('*.log') != ''
         with:
           name: test-logs
           path: |
