@@ -40,8 +40,8 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Set working directory
 WORKDIR /app
 
-# Run as root; setcap on binary grants NET_RAW/NET_ADMIN
-USER root
+# Run as relay; setcap on binary grants NET_RAW/NET_ADMIN regardless of UID
+USER relay
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
