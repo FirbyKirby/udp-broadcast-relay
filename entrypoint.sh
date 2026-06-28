@@ -5,37 +5,10 @@
 
 set -e
 
-# Handle dynamic PUID/PGID mapping
+# PUID/PGID are informational only — this relay has no file I/O
+# setcap grants NET_RAW/NET_ADMIN regardless of UID
 if [ -n "$PUID" ] && [ -n "$PGID" ]; then
-    CURRENT_UID=$(id -u relay 2>/dev/null || echo "")
-    CURRENT_GID=$(id -g relay 2>/dev/null || echo "")
-    if [ "$PUID" != "$CURRENT_UID" ] || [ "$PGID" != "$CURRENT_GID" ]; then
-        echo "[$(date +'%Y-%m-%d %H:%M:%S')] Updating relay user to UID:$PUID GID:$PGID" >&2
-
-        # Enhanced PGID handling: Check if group with PGID already exists
-        EXISTING_GROUP=$(getent group "$PGID" | cut -d: -f1 || echo "")
-        if [ -n "$EXISTING_GROUP" ]; then
-            echo "[$(date +'%Y-%m-%d %H:%M:%S')] Using existing group '$EXISTING_GROUP' for GID $PGID" >&2
-            GROUP_NAME="$EXISTING_GROUP"
-        else
-            GROUP_NAME="relaypgid"
-            echo "[$(date +'%Y-%m-%d %H:%M:%S')] Creating new group '$GROUP_NAME' with GID $PGID" >&2
-            groupadd -g "$PGID" "$GROUP_NAME" 2>/dev/null || echo "[$(date +'%Y-%m-%d %H:%M:%S')] Warning: Could not create group with GID $PGID" >&2
-        fi
-
-        # Change relay's primary group
-        usermod -g "$GROUP_NAME" relay 2>/dev/null || echo "[$(date +'%Y-%m-%d %H:%M:%S')] Warning: Could not update relay's primary group" >&2
-
-        # Enhanced PUID handling: Only change UID if different
-        if [ "$PUID" != "$CURRENT_UID" ]; then
-            usermod -u "$PUID" relay 2>/dev/null || echo "[$(date +'%Y-%m-%d %H:%M:%S')] Warning: Could not update user ID to $PUID" >&2
-        fi
-
-        # Update ownership of working directory only if needed
-        if [ -d "/app" ] && [ "$(stat -c %u /app 2>/dev/null || echo "")" != "$PUID" ]; then
-            chown -R relay:relay /app 2>/dev/null || echo "[$(date +'%Y-%m-%d %H:%M:%S')] Warning: Could not update ownership" >&2
-        fi
-    fi
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] PUID=$PUID PGID=$PGID (informational only, running as root with setcap)" >&2
 else
     echo "[$(date +'%Y-%m-%d %H:%M:%S')] PUID and PGID not set, using defaults" >&2
 fi
@@ -140,9 +113,7 @@ log "  DEBUG: ${DEBUG:-false}"
 log "  PUID: ${PUID:-1000}"
 log "  PGID: ${PGID:-1000}"
 log ""
-log "Using PUID=$PUID PGID=$PGID"
-log "Effective: uid=$(id -u relay) gid=$(id -g relay) groups=$(id -G relay)"
-log ""
+log "Running as root; setcap grants NET_RAW + NET_ADMIN"
 log "Command: udp-broadcast-relay-redux $ARGS"
 log ""
 
@@ -152,4 +123,5 @@ if [ "$TEST_MODE" = "1" ]; then
 fi
 
 # Execute the binary with constructed arguments
-exec su-exec "$PUID:$PGID" /usr/local/bin/udp-broadcast-relay-redux $ARGS
+# setcap grants NET_RAW/NET_ADMIN regardless of UID
+exec /usr/local/bin/udp-broadcast-relay-redux $ARGS
