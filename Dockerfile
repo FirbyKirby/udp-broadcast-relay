@@ -40,8 +40,6 @@ RUN chmod +x /usr/local/bin/entrypoint.sh
 # Set working directory
 WORKDIR /app
 
-USER relay
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD pgrep udp-broadcast-relay-redux || exit 1
