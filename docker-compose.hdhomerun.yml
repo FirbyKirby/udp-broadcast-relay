@@ -22,8 +22,6 @@ services:
       - INTERFACES=br0.10,br0.20
       - DEBUG=false
       - TZ=UTC
-      - PUID=99
-      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
