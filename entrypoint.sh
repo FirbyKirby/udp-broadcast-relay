@@ -110,4 +110,4 @@ if [ "$TEST_MODE" = "1" ]; then
 fi
 
 # Execute the binary with constructed arguments
-exec /usr/local/bin/udp-broadcast-relay-redux $ARGS
+exec su-exec relay /usr/local/bin/udp-broadcast-relay-redux $ARGS

@@ -19,7 +19,11 @@ FROM alpine:3.21
 # Copy binary from builder stage
 COPY --from=builder /build/udp-broadcast-relay-redux /usr/local/bin/
 
-RUN apk add --no-cache libcap \
+RUN apk add --no-cache libcap shadow su-exec \
+    && (getent group $PGID > /dev/null 2>&1 && delgroup $(getent group $PGID | cut -d: -f1) || true) \
+    && (getent passwd $PUID > /dev/null 2>&1 && deluser $(getent passwd $PUID | cut -d: -f1) || true) \
+    && (addgroup -g $PGID relay 2>/dev/null || addgroup relay) \
+    && adduser -D -s /bin/sh -u $PUID -G relay relay \
     && setcap cap_net_admin,cap_net_raw+ep /usr/local/bin/udp-broadcast-relay-redux
 
 # Copy entrypoint script
