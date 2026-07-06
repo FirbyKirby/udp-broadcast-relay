@@ -153,4 +153,4 @@ fi
 
 # Execute the binary with constructed arguments
 # setcap grants NET_RAW/NET_ADMIN regardless of UID
-exec /usr/local/bin/udp-broadcast-relay-redux $ARGS
+exec su-exec relay /usr/local/bin/udp-broadcast-relay-redux $ARGS
