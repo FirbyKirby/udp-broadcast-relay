@@ -20,7 +20,8 @@ FROM alpine:3.21
 COPY --from=builder /build/udp-broadcast-relay-redux /usr/local/bin/
 
 RUN apk add --no-cache libcap \
-    && setcap cap_net_admin,cap_net_raw+ep /usr/local/bin/udp-broadcast-relay-redux
+    && setcap -r /usr/local/bin/udp-broadcast-relay-redux \
+    && apk del libcap
 
 # Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/
