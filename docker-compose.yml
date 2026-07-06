@@ -15,8 +15,6 @@ services:
       - INTERFACES=br0.10,br0.20,br0.30
       - DEBUG=false
       - TZ=UTC
-      - PUID=99
-      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
@@ -40,8 +38,6 @@ services:
       - MULTICAST_GROUP=239.255.255.250
       - DEBUG=false
       - TZ=UTC
-      - PUID=99
-      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
@@ -64,8 +60,6 @@ services:
       - INTERFACES=br0.10,br0.20,br0.30
       - DEBUG=false
       - TZ=UTC
-      - PUID=99
-      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
@@ -88,8 +82,6 @@ services:
       - INTERFACES=br0.10,br0.20,br0.30
       - DEBUG=false
       - TZ=UTC
-      - PUID=99
-      - PGID=100
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "pgrep", "udp-broadcast-relay-redux"]
@@ -108,32 +100,6 @@ services:
 #    - Broadcasts go to ALL listed interfaces
 #    - For selective routing, use separate containers
 #    - Common patterns: br0.X (Unraid), vlanX (pfSense), eth0.X (Linux)
-#
-# 3. BROADCAST_PORT: Device-specific UDP ports
-#    - 65001: HDHomerun network tuners
-#    - 1900: Roku/SSDP multicast discovery
-#    - 9999/20002: TP-Link Kasa smart home
-#
-# 4. MULTICAST_GROUP: Optional for multicast protocols
-#    - 239.255.255.250: SSDP multicast (Roku)
-#    - Leave empty for broadcast-only protocols
-#
-# 5. Network Mode: Must be 'host' for multi-VLAN access
-#    - Allows container to see all host network interfaces
-#    - Required for VLAN trunking functionality
-#
-# 6. Capabilities: NET_ADMIN and NET_RAW required
-#    - Allows raw socket operations for packet manipulation
-#    - Enables interface binding and packet forwarding
-#
-# 7. Health Checks: Monitor relay process
-#    - Ensures container stays running
-#    - Automatic restart on process failure
-#
-# 8. PUID and PGID: User and Group ID settings
-#    - PUID: Process User ID (default: 99 for 'nobody' in Unraid)
-#    - PGID: Process Group ID (default: 100 for 'users' in Unraid)
-#    - Used for file permissions when mounting host volumes
 #
 # Usage Examples:
 #

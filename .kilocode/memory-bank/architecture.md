@@ -24,9 +24,7 @@ ENTRYPOINT ["/entrypoint.sh"]
 ```
 
 ### Security Layers
-1. **PUID/PGID Mapping:** Runtime user/group mapping with intelligent GID handling
 2. **Shadow Package:** Provides usermod/groupmod tools for user mapping
-3. **Non-Root User:** relay:relay (1000:1000 default, PUID/PGID configurable)
 4. **File Capabilities:** Set on binary, not inherited (cap_net_admin,cap_net_raw+ep)
 5. **Minimal Base:** Alpine Linux, no unnecessary packages
 6. **No Privileged Mode:** Capabilities sufficient
@@ -112,16 +110,9 @@ MULTICAST_GROUP=239.255.255.250
 
 **Entrypoint Processing:**
 ```bash
-# PUID/PGID runtime mapping
-if [ -n "$PUID" ] && [ "$PUID" != "1000" ]; then
-  usermod -o -u "$PUID" relay
 fi
-if [ -n "$PGID" ] && [ "$PGID" != "1000" ]; then
   # Intelligent GID handling - avoid Alpine GID 100 conflict
-  if getent group "$PGID" >/dev/null 2>&1; then
-    groupmod -n relay "$(getent group "$PGID" | cut -d: -f1)"
   else
-    groupmod -o -g "$PGID" relay
   fi
 fi
 
