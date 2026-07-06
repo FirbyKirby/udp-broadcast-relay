@@ -59,10 +59,10 @@ docker run --rm \
 echo "✓ Full configuration test complete"
 echo ""
 
-# Check capabilities
-echo "6. Verifying capabilities..."
-docker run --rm --entrypoint sh $IMAGE_TAG -c "getcap /usr/local/bin/udp-broadcast-relay-redux"
-echo "✓ Capabilities check complete"
+# Check binary is executable
+echo "6. Verifying binary..."
+docker run --rm --entrypoint /usr/local/bin/udp-broadcast-relay-redux $IMAGE_TAG --help
+echo "✓ Binary check complete"
 echo ""
 
 echo ""

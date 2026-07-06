@@ -18,12 +18,10 @@ FROM alpine:3.21
 
 # Copy binary from builder stage
 COPY --from=builder /build/udp-broadcast-relay-redux /usr/local/bin/
-
-RUN apk add --no-cache libcap \
-    && setcap cap_net_admin,cap_net_raw+ep /usr/local/bin/udp-broadcast-relay-redux
+RUN chmod +x /usr/local/bin/udp-broadcast-relay-redux
 
 # Copy entrypoint script
-COPY entrypoint.sh /usr/local/bin/
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Set working directory
