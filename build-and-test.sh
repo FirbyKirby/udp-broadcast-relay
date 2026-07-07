@@ -61,7 +61,15 @@ echo ""
 
 # Check binary is functional
 echo "6. Verifying binary is functional..."
-docker run --rm --entrypoint /usr/local/bin/udp-broadcast-relay-redux $IMAGE_TAG --help 2>&1 | head -5 || echo "Note: --help may not be supported by the original C binary (that's OK)"
+set +e
+BINARY_OUTPUT=$(docker run --rm --entrypoint /usr/local/bin/udp-broadcast-relay-redux $IMAGE_TAG --help 2>&1)
+BINARY_EXIT=$?
+set -e
+echo "$BINARY_OUTPUT" | head -5
+if [ $BINARY_EXIT -eq 139 ] || [ $BINARY_EXIT -eq 134 ] || [ $BINARY_EXIT -eq 136 ]; then
+    echo "ERROR: Binary crashed (exit code $BINARY_EXIT)"
+    exit 1
+fi
 echo "✓ Binary check complete"
 echo ""
 
