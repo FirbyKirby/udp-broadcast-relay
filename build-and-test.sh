@@ -59,8 +59,8 @@ docker run --rm \
 echo "✓ Full configuration test complete"
 echo ""
 
-# Check binary is functional
-echo "6. Verifying binary is functional..."
+# Smoke test: binary starts and exits without crashing
+echo "6. Running binary smoke test..."
 set +e
 BINARY_OUTPUT=$(docker run --rm --entrypoint /usr/local/bin/udp-broadcast-relay-redux $IMAGE_TAG --help 2>&1)
 BINARY_EXIT=$?
@@ -70,7 +70,7 @@ if [ $BINARY_EXIT -eq 139 ] || [ $BINARY_EXIT -eq 134 ] || [ $BINARY_EXIT -eq 13
     echo "ERROR: Binary crashed (exit code $BINARY_EXIT)"
     exit 1
 fi
-echo "✓ Binary check complete"
+echo "✓ Smoke test complete (binary exited without crashing)"
 echo ""
 
 echo ""
