@@ -1,4 +1,4 @@
-# UDP Broadcast Relay Redux - Docker
+# AdCraft's UDP Broadcast Relay Redux
 
 A Dockerized UDP broadcast relay that enables IoT device discovery across VLANs. Works alongside any network controller that already handles mDNS repeater functionality (for example, UDM Pro, UniFi Dream Router).
 
@@ -8,6 +8,15 @@ A Dockerized UDP broadcast relay that enables IoT device discovery across VLANs.
 > Warning
 > - Each container instance must use a unique RELAY_ID between 1 and 99 to prevent loops.
 > - Each container relays to all configured interfaces. For selective paths, run multiple containers with different interface sets.
+
+## About this fork
+
+This project is a fork of [FirbyKirby/udp-broadcast-relay](https://github.com/FirbyKirby/udp-broadcast-relay), which did the original work of packaging udp-broadcast-relay-redux into a clean, Docker Compose-friendly container. All credit for the original design, Dockerfile, and documentation structure goes to FirbyKirby — I liked the solution enough to base my own setup on it directly.
+
+I forked it after running into issues with environment variables from my docker-compose file not being read reliably into the container's arguments. My changes so far:
+
+- Reworked the entrypoint's argument handling to be more resilient to how docker-compose passes environment variables, replacing the shell-based argument construction with a [Python entrypoint](entrypoint.py)
+- Further customizations planned as I adapt the container to my own setup
 
 ## Overview
 
@@ -31,7 +40,7 @@ docker run -d \
   -e RELAY_ID=1 \
   -e BROADCAST_PORT=65001 \
   -e INTERFACES=br0.10,br0.20 \
-  docker.io/firbykirby/udp-broadcast-relay:latest
+  docker.io/fingerhutascode/udp-broadcast-relay:latest
 ```
 
 Notes:
@@ -89,7 +98,9 @@ Relationship to mDNS:
 
 ## Contributing
 
-This container packages the upstream tool: udp-broadcast-relay-redux. Contributions and issues are welcome: https://github.com/udp-redux/udp-broadcast-relay-redux
+This container packages the upstream tool: udp-broadcast-relay-redux. Contributions and issues for the relay binary itself are welcome upstream: https://github.com/udp-redux/udp-broadcast-relay-redux
+
+The Docker packaging in this repo is forked from [FirbyKirby/udp-broadcast-relay](https://github.com/FirbyKirby/udp-broadcast-relay) — see [About this fork](#about-this-fork) above for what's changed here.
 
 ## License
 

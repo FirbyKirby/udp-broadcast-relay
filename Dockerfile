@@ -1,5 +1,5 @@
 # Multi-architecture Dockerfile for udp-broadcast-relay-redux
-FROM alpine:3.21 AS builder
+FROM alpine:latest AS builder
 ARG TARGETPLATFORM
 RUN echo "Target platform: $TARGETPLATFORM"
 
@@ -14,17 +14,17 @@ COPY main.c .
 RUN gcc -g main.c -o udp-broadcast-relay-redux
 
 # Runtime stage - minimal Alpine Linux
-FROM alpine:3.21
+FROM alpine:latest
 
 # Copy binary from builder stage
 COPY --from=builder /build/udp-broadcast-relay-redux /usr/local/bin/
 
-RUN apk add --no-cache libcap \
+RUN apk add --no-cache libcap python3 \
     && setcap cap_net_admin,cap_net_raw+ep /usr/local/bin/udp-broadcast-relay-redux
 
-# Copy entrypoint script
-COPY entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh
+# Copy entrypoint scripts
+COPY entrypoint.sh entrypoint.py /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/entrypoint.py
 
 # Set working directory
 WORKDIR /app

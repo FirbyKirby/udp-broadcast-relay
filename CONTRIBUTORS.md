@@ -3,6 +3,13 @@ CONTRIBUTORS
 
 (Reverse chronological)
 
+-   Brandon Fingerhut ([FingerhutAsCode](https://github.com/FingerhutAsCode)) forked
+    the Docker packaging to make the container's argument handling more
+    resilient to how docker-compose passes environment variables, replacing
+    the shell-based entrypoint with a Python one.
+-   [FirbyKirby](https://github.com/FirbyKirby) created the Docker packaging
+    for udp-broadcast-relay-redux (this repo's origin), including the
+    Dockerfile, entrypoint, and Compose examples.
 -   [Michael Morrison](https://github.com/mmorrisontx) forked to
     udp-broadcast-relay-redux, refactored the code, added support for
     FreeBSD / pfSense, multicast packets, and interface source address.

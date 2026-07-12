@@ -3,6 +3,11 @@ name: Publish Docker image (multi-arch)
 on:
   push:
     tags: [ "v*" ]
+  schedule:
+    # 09:00 UTC nightly - rebuilds 'latest' when main has new commits or
+    # the alpine:latest base image has moved, to pick up base-image
+    # security patches even between tagged releases.
+    - cron: '0 9 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -10,9 +15,57 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      needs_build: ${{ steps.compare.outputs.needs_build }}
+      alpine_digest: ${{ steps.alpine.outputs.digest }}
+    steps:
+      - name: Get current alpine:latest digest
+        id: alpine
+        run: |
+          docker pull alpine:latest
+          digest=$(docker inspect --format '{{index .RepoDigests 0}}' alpine:latest)
+          echo "Current alpine:latest digest: $digest"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Check whether a build is needed
+        id: compare
+        run: |
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            echo "Triggered by ${{ github.event_name }}, always building."
+            echo "needs_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! docker pull fingerhutascode/udp-broadcast-relay:latest; then
+            echo "No published 'latest' image found, will build."
+            echo "needs_build=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          published_sha=$(docker inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' fingerhutascode/udp-broadcast-relay:latest)
+          published_alpine_digest=$(docker inspect --format '{{ index .Config.Labels "dev.fingerhutascode.alpine-base-digest" }}' fingerhutascode/udp-broadcast-relay:latest)
+
+          echo "Published image git SHA: $published_sha"
+          echo "Current git SHA:         ${{ github.sha }}"
+          echo "Published alpine digest: $published_alpine_digest"
+          echo "Current alpine digest:   ${{ steps.alpine.outputs.digest }}"
+
+          if [ "$published_sha" != "${{ github.sha }}" ] || [ "$published_alpine_digest" != "${{ steps.alpine.outputs.digest }}" ]; then
+            echo "Change detected (new commit or new alpine base), will build."
+            echo "needs_build=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No new commits and alpine base unchanged, nothing to do."
+            echo "needs_build=false" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: check-version
+    if: |
+      needs.check-version.outputs.needs_build == 'true' &&
+      (startsWith(github.ref, 'refs/tags/v') || github.event_name == 'schedule')
     permissions:
       contents: read
       security-events: write
@@ -84,10 +137,14 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [check-version, test]
     if: |
-      github.event_name == 'workflow_dispatch' ||
-      (startsWith(github.ref, 'refs/tags/v') && needs.test.result == 'success')
+      needs.check-version.outputs.needs_build == 'true' &&
+      (
+        github.event_name == 'workflow_dispatch' ||
+        (startsWith(github.ref, 'refs/tags/v') && needs.test.result == 'success') ||
+        (github.event_name == 'schedule' && needs.test.result == 'success')
+      )
     permissions:
       contents: read
       packages: write
@@ -113,7 +170,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: docker.io/firbykirby/udp-broadcast-relay
+          images: docker.io/fingerhutascode/udp-broadcast-relay
           tags: |
             type=raw,value=latest
             type=semver,pattern=v{{version}}
@@ -125,7 +182,9 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+            dev.fingerhutascode.alpine-base-digest=${{ needs.check-version.outputs.alpine_digest }}
           sbom: false
           provenance: false
           cache-from: type=gha
@@ -218,7 +277,7 @@ jobs:
           echo "Event: ${{ github.event_name }}"
           echo "Ref: ${{ github.ref }}"
           echo "SHA: ${{ github.sha }}"
-          echo "Repository: firbykirby/udp-broadcast-relay"
+          echo "Repository: fingerhutascode/udp-broadcast-relay"
           echo "README file: ./README.md"
           echo "::endgroup::"
 
@@ -227,7 +286,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: firbykirby/udp-broadcast-relay
+          repository: fingerhutascode/udp-broadcast-relay
           readme-filepath: ./README.md
           short-description: 'UDP broadcast relay for Docker - relay UDP broadcasts across VLANs/subnets with mDNS support'
 
@@ -235,7 +294,7 @@ jobs:
         if: success()
         run: |
           echo "::notice::README successfully synchronized to Docker Hub"
-          echo "Docker Hub repository: https://hub.docker.com/r/firbykirby/udp-broadcast-relay"
+          echo "Docker Hub repository: https://hub.docker.com/r/fingerhutascode/udp-broadcast-relay"
 
       - name: Log sync failure
         if: failure()
@@ -243,7 +302,7 @@ jobs:
           echo "::error::Failed to synchronize README to Docker Hub"
           echo "::error::Check the following:"
           echo "::error::1. DOCKERHUB_USERNAME and DOCKERHUB_TOKEN secrets are correctly configured"
-          echo "::error::2. Docker Hub repository 'firbykirby/udp-broadcast-relay' exists and is accessible"
+          echo "::error::2. Docker Hub repository 'fingerhutascode/udp-broadcast-relay' exists and is accessible"
           echo "::error::3. README.md file exists and is readable"
           echo "::error::4. Docker Hub API is operational (check https://status.docker.com)"
           echo "::error::Manual retry: Use workflow_dispatch to retry without rebuilding images"
@@ -258,7 +317,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "The README.md has been successfully synchronized to Docker Hub." >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Docker Hub Repository:** [firbykirby/udp-broadcast-relay](https://hub.docker.com/r/firbykirby/udp-broadcast-relay)" >> $GITHUB_STEP_SUMMARY
+            echo "**Docker Hub Repository:** [fingerhutascode/udp-broadcast-relay](https://hub.docker.com/r/fingerhutascode/udp-broadcast-relay)" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ **Status:** Failed" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY

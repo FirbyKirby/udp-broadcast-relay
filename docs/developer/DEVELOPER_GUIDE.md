@@ -48,8 +48,8 @@ Prerequisites: Git 2.40+, GitHub account with repo access, optional: GitHub CLI 
 
 ```bash
 # Clone and enter the repo
-git clone https://github.com/firbykirby/udp-broadcast-relay.git
-cd udp-broadcast-relay
+git clone https://github.com/FingerhutAsCode/udp-broadcast-relay-docker.git
+cd udp-broadcast-relay-docker
 
 # Configure identity
 git config user.name "Your Name"
@@ -129,7 +129,7 @@ What happens next:
 - **MINOR** 1.x.0: Backward-compatible features
 - **PATCH** 1.2.x: Backward-compatible fixes
 
-Docker Hub: https://hub.docker.com/r/firbykirby/udp-broadcast-relay
+Docker Hub: https://hub.docker.com/r/fingerhutascode/udp-broadcast-relay
 
 ---
 

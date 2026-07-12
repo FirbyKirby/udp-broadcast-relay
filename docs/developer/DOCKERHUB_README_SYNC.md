@@ -4,7 +4,7 @@ Keep Docker Hub documentation in lockstep with your repository by automatically 
 
 - Workflow file: [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml)
 - Developer guide: [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
-- Docker Hub repository: https://hub.docker.com/r/firbykirby/udp-broadcast-relay
+- Docker Hub repository: https://hub.docker.com/r/fingerhutascode/udp-broadcast-relay
 
 
 ## 1. Overview
@@ -62,11 +62,11 @@ GitHub repository prerequisites
 - The workflow file present at [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml).
 
 Docker Hub prerequisites
-- A Docker Hub repository must exist: firbykirby/udp-broadcast-relay.
+- A Docker Hub repository must exist: fingerhutascode/udp-broadcast-relay.
 - A Docker Hub Access Token with permissions to update repository descriptions (read/write scope).
 
 Required GitHub secrets
-- DOCKERHUB_USERNAME: Docker Hub username (for example firbykirby).
+- DOCKERHUB_USERNAME: Docker Hub username (for example fingerhutascode).
 - DOCKERHUB_TOKEN: Docker Hub Access Token (recommended over password).
 
 Permissions used by the sync job
@@ -122,7 +122,7 @@ git push origin :refs/tags/v0.0.0-test
 Verification
 - Open the Actions tab, select the latest run of Publish Docker image (multi-arch), and inspect the sync-readme job.
 - Visit the Docker Hub page and confirm the README is updated:
-  https://hub.docker.com/r/firbykirby/udp-broadcast-relay
+  https://hub.docker.com/r/fingerhutascode/udp-broadcast-relay
 
 
 ## 5. Usage
@@ -160,7 +160,7 @@ Common issues and resolutions
   - Cause: Invalid DOCKERHUB_USERNAME or DOCKERHUB_TOKEN.
   - Fix: Recreate the Docker Hub Access Token, update the GitHub secret, and re-run.
 - 404 Repository not found
-  - Cause: Docker Hub repository firbykirby/udp-broadcast-relay does not exist or wrong namespace.
+  - Cause: Docker Hub repository fingerhutascode/udp-broadcast-relay does not exist or wrong namespace.
   - Fix: Create the repository on Docker Hub or correct the repository name in the workflow.
 - 429 Rate limit exceeded
   - Cause: Excessive API calls in a short window.
@@ -199,7 +199,7 @@ Workflow structure (abridged)
     - Uses peter-evans/dockerhub-description with:
       - username: ${{ secrets.DOCKERHUB_USERNAME }}
       - password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - repository: firbykirby/udp-broadcast-relay
+      - repository: fingerhutascode/udp-broadcast-relay
       - readme-filepath: ./README.md
       - short-description: brief summary for Docker Hub listing.
 
@@ -243,7 +243,7 @@ Operational tips
 - Workflow file: [.github/workflows/docker-publish.yml](.github/workflows/docker-publish.yml)
 - Developer guide: [DEVELOPER_GUIDE.md](DEVELOPER_GUIDE.md)
 - Root README: [README.md](README.md)
-- Docker Hub repository: https://hub.docker.com/r/firbykirby/udp-broadcast-relay
+- Docker Hub repository: https://hub.docker.com/r/fingerhutascode/udp-broadcast-relay
 - Action used: https://github.com/peter-evans/dockerhub-description
 
 

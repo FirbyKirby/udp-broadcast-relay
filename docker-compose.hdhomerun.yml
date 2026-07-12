@@ -1,5 +1,3 @@
-version: '3.8'
-
 # HDHomerun Discovery Relay
 # Relays HDHomerun discovery broadcasts (UDP 65001) between VLANs where:
 #   - HDHomerun tuner is on one VLAN
@@ -11,7 +9,7 @@ version: '3.8'
 
 services:
   hdhomerun-relay:
-    image: docker.io/firbykirby/udp-broadcast-relay:latest
+    image: docker.io/fingerhutascode/udp-broadcast-relay:latest
     network_mode: host
     cap_add:
       - NET_ADMIN
